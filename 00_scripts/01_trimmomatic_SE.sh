@@ -18,7 +18,7 @@ fi
 base=$(basename "$file")
 
 TIMESTAMP=$(date +%Y-%m-%d_%Hh%Mm%Ss)
-LOG_FOLDER="log"
+LOG_FOLDER="log_files"
 
 #create folder if not existent:
 mkdir $LOG_FOLDER 2>/dev/null
@@ -29,9 +29,9 @@ ADAPTERFILE="Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa"
 NCPU="$NCPUS_TRIMMO"
 
 java -jar -Xmx10G Trimmomatic-0.39/trimmomatic-0.39.jar SE \
-        -threads $NCPU \
+        -threads "$NCPU" \
         -phred33 \
-        "$file".fastq.gz \
+        "$file" \
         02_trimmed/"$base"_R1.fastq.gz \
         ILLUMINACLIP:"$ADAPTERFILE":2:30:10 \
         HEADCROP:9 \

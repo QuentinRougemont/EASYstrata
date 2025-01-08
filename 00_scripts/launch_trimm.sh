@@ -60,7 +60,7 @@ else
     echo "running trimmomatic" 
     while IFS=$'\t' read -r -a read ; 
     do 
-        ./00_scripts/01_trimmomatic_SE.sh "${read[0]}" 2>&1 |tee "$LOG_FOLDER"/trimmo_"${read[0]}"_log  
+        ./00_scripts/01_trimmomatic_SE.sh "${read[0]}" #2>&1 |tee "$LOG_FOLDER"/trimmo_"$(basename ${read[0]})"_log  
         if [[  "${PIPESTATUS[0]}" -ne 0 ]]
         then
             echo "ERROR TRIMMOMATIC FAILED"
