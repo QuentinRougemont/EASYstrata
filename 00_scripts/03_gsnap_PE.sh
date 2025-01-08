@@ -1,5 +1,5 @@
 #!/bin/bash
-
+source ../config/cpu_mem
 #author: QR
 #script to run gsnap
 #input : fastq and genome
@@ -24,7 +24,7 @@ DATAOUTPUT="04_mapped/"
 DATAINPUT="02_trimmed"
 mkdir -p "$DATAOUTPUT" 2>/dev/null
 
-NCPUS=8
+NCPUS=$NCPUS_GSNAP
 
 
 # For genome

@@ -15,13 +15,13 @@ else
     echo "fastq file is : ${fq}"
     echo " "
 fi
-
+source ../config/cpu_mem
 # Global variables
 DATAOUTPUT="04_mapped/"
 DATAINPUT="02_trimmed"
 mkdir -p $DATAOUTPUT 2>/dev/null
 
-NCPUS=8
+NCPUS=$NCPUS_GSNAP
 
 # For genome
 #check:

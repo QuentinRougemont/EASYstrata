@@ -6,7 +6,7 @@
 
 #------------ EXTERNAL VARIABLE FROM CONFIG FILE -------------- #
 source ../config/config
-
+source ../config/cpu_mem
 
 #------------- CONDA ACTIVATION  -------------- #
 eval "$(conda shell.bash hook)"
@@ -42,6 +42,7 @@ TIME=$(date +%Y-%m-%d_%Hh%Mm%Ss)
 LOG_FOLDER="log_files"
 #create log folder
 mkdir $LOG_FOLDER 2>/dev/null
+NCPUS="$NCPUS_REPEATEMODELER"
 
 # ----- check compression of fasta  ------ ##
 #check compression
@@ -81,7 +82,7 @@ BuildDatabase -name "$database" -engine ncbi ../"$genome" 2>&1 |\
     tee ../$LOG_FOLDER/buildDatabase."$base"."$TIME".log
 
 #de novo TE annotations:
-RepeatModeler -threads 18 -engine ncbi -database "$database" 2>&1 |\
+RepeatModeler -threads "$NCPUS" -engine ncbi -database "$database" 2>&1 |\
     tee ../$LOG_FOLDER/repeatmodeler_"$base"."$TIME".log 
 if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
@@ -99,7 +100,7 @@ fi
 FOLDER1=FOLDER1_"${base}"_mask."$TIME"
 mkdir "$FOLDER1"
 lib1="$TEdatabase" 
-RepeatMasker -pa 18 -e ncbi -lib "$lib1" -noint -xsmall -dir "$FOLDER1" ../"$genome" 2>&1 |\
+RepeatMasker -pa "$NCPUS" -e ncbi -lib "$lib1" -noint -xsmall -dir "$FOLDER1" ../"$genome" 2>&1 |\
     tee ../"$LOG_FOLDER"/F1_repeatmasker_"$base"."$TIME".log 
 if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
@@ -132,7 +133,7 @@ fi
 
 #ROUND2:
 #run repeatmasker:
-RepeatMasker -pa 18 -e ncbi -lib "$libcat" -xsmall -dir "$FOLDER2" "$FOLDER1"/"$base".masked 2>&1 |\
+RepeatMasker -pa "$NCPUS" -e ncbi -lib "$libcat" -xsmall -dir "$FOLDER2" "$FOLDER1"/"$base".masked 2>&1 |\
     tee ../$LOG_FOLDER/F2_repeatmasker_"$base"."$TIME".log  
 if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
@@ -149,7 +150,7 @@ FOLDER3=FOLDER3_"${base}"_mask.$TIME
 mkdir "$FOLDER3"
 
 #run repeatmasker:
-RepeatMasker -pa 18 -e ncbi -species  "${ncbi_species}" -xsmall -dir "$FOLDER3"   "$FOLDER2"/"$base".masked.masked 2>&1 | \
+RepeatMasker -pa "$NCPUS" -e ncbi -species  "${ncbi_species}" -xsmall -dir "$FOLDER3"   "$FOLDER2"/"$base".masked.masked 2>&1 | \
     tee ../$LOG_FOLDER/F3_repeatmasker_"$base"."$TIME".log  ||\
 if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then

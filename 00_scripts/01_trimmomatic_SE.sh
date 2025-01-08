@@ -1,4 +1,5 @@
 #!/bin/bash
+source config/cpu_mem
 
 #required arguments: name of read1.fastq.gz
 if [ $# -ne 1  ]; then
@@ -25,10 +26,7 @@ mkdir 02_trimmed  2>/dev/null
 
 ADAPTERFILE="Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa"
 
-if [[ -z "$NCPU" ]]
-then
-    NCPU=8
-fi
+NCPU="$NCPUS_TRIMMO"
 
 java -jar -Xmx10G Trimmomatic-0.39/trimmomatic-0.39.jar SE \
         -threads $NCPU \

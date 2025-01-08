@@ -5,7 +5,7 @@
 
 #------------- EXTERNAL VARIABLE FROM CONFIG FILE -------------- #
 source ../config/config
-
+source ../config/cpu_mem
 #------------- CONDA ACTIVATION  -------------- #
 eval "$(conda shell.bash hook)"
 conda activate superannot
@@ -48,11 +48,7 @@ else
     NCPUS=$6
 fi
 
-
-if [[ -z "$NCPUS" ]]
-then
-    NCPUS=8
-fi
+NCPUS="$NCPUS_BRAKER"
 
 TIME=$(date +%Y-%m-%d_%Hh%Mm%Ss)
 

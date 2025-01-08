@@ -2,6 +2,7 @@
 #date: 14-11-22
 #Author:QR
 #script to run trimmomatic
+source config/cpu_mem
 
 #required arguments: name of read1.fastq.gz and read2.fastq.gz
 if [ $# -ne 2 ]; then
@@ -20,15 +21,18 @@ fi
 #base=$(basename $file1)
 base=$(basename ${file1%[_.]*[._]f**gz} )
 
+base=$(basename ${file1%R1.*f**gz} )
+echo base is $base
+
 TIMESTAMP=$(date +%Y-%m-%d_%Hh%Mm%Ss)
-LOG_FOLDER="log"
+LOG_FOLDER="log_files"
 
 #create folder if not existent:
 mkdir $LOG_FOLDER 2>/dev/null
 mkdir 02_trimmed  2>/dev/null
 
 ADAPTERFILE="Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa"
-NCPU=8
+NCPU="$NCPUS_TRIMMO"
 
 for file in 02_trimmed/*gz 
 do
