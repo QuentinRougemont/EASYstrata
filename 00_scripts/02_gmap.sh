@@ -24,5 +24,5 @@ then
     #run gmap
     gmap_build --dir="$GENOMEFOLDER" "$FASTA" -d "$GENOME"
 else
-    echo "gmap index of"
+    echo "gmap index ok"
 fi

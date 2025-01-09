@@ -18,7 +18,7 @@ fi
 source ../config/cpu_mem
 # Global variables
 DATAOUTPUT="04_mapped/"
-DATAINPUT="02_trimmed"
+DATAINPUT="../02_trimmed"
 mkdir -p $DATAOUTPUT 2>/dev/null
 
 NCPUS=$NCPUS_GSNAP
@@ -33,33 +33,45 @@ platform="Illumina"
 input=$(basename "$fq")
 base=${input%_R1.fastq.gz}
 
-# Align reads
-echo "Aligning $base"
-#gsnap  -t "$NCPUS" -A sam \
-gsnap --gunzip -t "$NCPUS" -A sam \
-         -M 2 -n 10 -N 1 \
-         -w 200000 --pairmax-rna=200000 \
-         -E 1 -B 2 \
-         --clip-overlap \
-        --dir="$GENOMEFOLDER" -d "$GENOME" \
-        --split-output="$DATAOUTPUT"/"$base" \
-        --read-group-id="$base" \
-        --read-group-platform="$platform" \
-        "$DATAINPUT"/"$base"_R1.fastq.gz
+minsize=150999000 #any bam smaller than this (150 mb) will be ignored and recreated
+bamfile="$DATAOUTPUT"/"$base".sorted.bam
+if [ -s $bamfile ]
+then
+    filesize=$(wc -c <$bamfile )
+else
+    filesize=0
+fi
 
-# concatenate sam
-samtools view -b "$DATAOUTPUT"/"$base".uniq >"$DATAOUTPUT"/"$base".concordant_uniq.bam
-
-#sorting bam
-echo "Creating sorted bam for $base"
-samtools sort "$DATAOUTPUT"/"$base".concordant_uniq.bam -o "$DATAOUTPUT"/"$base".sorted.bam
-samtools index "$DATAOUTPUT"/"$base".sorted.bam
-# Clean up
-echo "Removing ""$TMP""/""$base"".bam"
-
-rm $DATAOUTPUT/"$base".concordant*
-rm $DATAOUTPUT/"$base".halfmapping*
-rm $DATAOUTPUT/"$base".nomapping*
-#rm $DATAOUTPUT/"$base".paired*
-rm $DATAOUTPUT/"$base".unpaired*
-
+if [ "$filesize" -lt "$minsize" ]
+then
+    echo "running gsnap"
+    # Align reads
+    echo "Aligning $base"
+    #gsnap  -t "$NCPUS" -A sam \
+    gsnap --gunzip -t "$NCPUS" -A sam \
+             -M 2 -n 10 -N 1 \
+             -w 200000 --pairmax-rna=200000 \
+             -E 1 -B 2 \
+             --clip-overlap \
+            --dir="$GENOMEFOLDER" -d "$GENOME" \
+            --split-output="$DATAOUTPUT"/"$base" \
+            --read-group-id="$base" \
+            --read-group-platform="$platform" \
+            "$DATAINPUT"/"$base"_R1.fastq.gz
+    
+    # concatenate sam
+    samtools view -b "$DATAOUTPUT"/"$base".uniq >"$DATAOUTPUT"/"$base".concordant_uniq.bam
+    
+    #sorting bam
+    echo "Creating sorted bam for $base"
+    samtools sort "$DATAOUTPUT"/"$base".concordant_uniq.bam -o "$DATAOUTPUT"/"$base".sorted.bam
+    samtools index "$DATAOUTPUT"/"$base".sorted.bam
+    # Clean up
+    echo "Removing ""$TMP""/""$base"".bam"
+    
+    rm $DATAOUTPUT/"$base".concordant*
+    rm $DATAOUTPUT/"$base".nomapping*
+else 
+    echo "BAM file already present" 
+    echo "please check the data" 
+fi   

@@ -8,7 +8,7 @@ echo rnaseqlist is $RNAseqlist
 #RNAseq=YES
 
 TIME=$(date +%Y-%m-%d_%Hh%Mm%Ss)
-LOG_FOLDER="log_files"
+LOG_FOLDER="LOGS"
 
 #create folder if not existent:
 mkdir $LOG_FOLDER 2>/dev/null
@@ -41,7 +41,7 @@ else
     #launch gsnap - samtools and read count:
     echo -e "\nrunning gsnap assuming reads are Single-End\n"
 
-    for read1 in ../02_trimmed/*R1.paired.fastq.gz ; do
+    for read1 in ../02_trimmed/*R1.fastq.gz ; do
         [ -e "$read1" ] || continue 
         ../00_scripts/03_gsnap_SE.sh "$genome" "$read1" 2>&1 |tee "$LOG_FOLDER"/gsnap_"$(basename "$read1")"_"$TIME".log
         if [[  "${PIPESTATUS[0]}" -ne 0 ]]

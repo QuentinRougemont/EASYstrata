@@ -21,7 +21,7 @@ fi
 # Global variables
 
 DATAOUTPUT="04_mapped/"
-DATAINPUT="02_trimmed"
+DATAINPUT="../02_trimmed"
 mkdir -p "$DATAOUTPUT" 2>/dev/null
 
 NCPUS=$NCPUS_GSNAP
@@ -39,7 +39,7 @@ base=${input%_R1.paired.fastq.gz}
 
 for file in "$DATAOUTPUT"/"$base".sorted.bam 
 do
-    if [ ! -s "${file}" ] 
+    if [ ! -s "${file}" ] #maybe replace by check on min size ? 
     then
         
         # Align reads

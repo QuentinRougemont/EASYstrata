@@ -237,8 +237,10 @@ fi
 
 ```
 command='augustus'
-if ! command -v $command &> /dev/null
-then
+if command -v $command &> /dev/null && $commnand --version 2>&1 |grep -q "3.5.0" ; 
+then 
+   echo  "augustus v3.5.0" installed
+else
     echo "$command could not be found"
     echo "will attempt a manual install" 
     echo "you may encounter several error and have to comment/uncomment or change path in "common.mk" especially without root privilege"

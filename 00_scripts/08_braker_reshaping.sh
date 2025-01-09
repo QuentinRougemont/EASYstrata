@@ -241,7 +241,7 @@ awk '$2 =="Complete" || $2 =="Duplicated" {print $1"\t"$2"\t"$3}' "$table" \
     | awk '{print $3}' \
     | cat longest.transcript.tmp - > all.transcripts
 
-grep -A1 -Ff all.transcripts "$haplo".prot.lin.fasta \
+grep -A1 -Ff all.transcripts "$haplo".prot.lin.fasta |\
     sed '/^--/d' > \
     "$haplo".longest_transcript.fa
 

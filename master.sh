@@ -940,7 +940,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
         #if all is OK then run GeneSpace - paml etc :
         #TO DO: modifiy the script RunGeneSpace etc to handle case with/without ancestral species
@@ -1054,7 +1054,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
 
         #then run GeneSpace etc :
@@ -1150,7 +1150,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
 
         #then run GeneSpace etc :
@@ -1244,7 +1244,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n" >  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
         
         #then run GeneSpace etc :
@@ -1343,7 +1343,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n" >  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
 
         #then run GeneSpace etc :
@@ -1462,7 +1462,7 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n"  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
 
         #then run GeneSpace etc :

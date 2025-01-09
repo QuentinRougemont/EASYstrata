@@ -1,4 +1,4 @@
-#mamba env create -p superannot -f environment.yml
+#mamba env create -p superannot -f annotation_env.yml
 #conda activate superannot
 name: superannot
 channels:
@@ -47,7 +47,7 @@ dependencies:
   - bioconductor-rtracklayer=1.62.0
   - r-rjags=4.14
   - r-rsvg=2.6.0
-  - r-igraph=2.1.2
+  - r-igraph=2.0.3
   - r-devtools=2.4.5
   - r-curl=5.2.1
   - r-cowplot=1.1.3

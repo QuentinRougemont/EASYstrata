@@ -1,10 +1,27 @@
 # genome annotation - Synteny - Ds computation - changepoint analysis - whole genome alignments 
 ====================================================================================
 
+# TO DO: 
+	fill this readme 
+
+# Requirements
+
+This software is suitable only linux-like systems  (Unfortunately not Windows or MAC) 
+
+# Table of content 
+
    * [Purpose](#purpose)
-   * [Installation](#Installation)
+   * [Installation](#installation)
+   * [Before-launching-the-workflow](#before-launching-the-workflow)
+   * [How to use](#how-to-use)
+	   * [From genome annotation to strata inference](#from-genome-annotation-to-strata-inference)
+	   * [Genome annotation only](#genome-annotation-only)
+	   * [Synteny and strata inference from existing data](#synteny-and-strata-inference-from-existing-data)
+	   * [Restart at any step](#restart-at-any-step) 
    * [Input data](#input-data)
    * [Example input data](#example-input-data)
+   * [Details of the worfklow and results](#details-of-the-workflow-and-results)
+   * [Output files](#output-files)
 
 
 # Purpose:
@@ -27,7 +44,7 @@ Installation:
 
 
 
-# Launching the whole workflow
+# Before Launching the workflow
 
 After cloning the pipeline, please, work from within it to preserve the architecture  
 
@@ -36,33 +53,108 @@ We recommend that you clone the pipeline ***for each of your new project*** and 
 Keep all project separated otherwise it will be difficult to recover your results.   
 
 
-All options and input **must** be set in the config file: `config/config`
+All options and full path to input files **must** be set in the **config** file provided in : `config/config` .
 
-an example is provided [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data/example.config)
+PLEASE, carefully read the user guide below before any attempte at running the workflow
 
 
-## How to: 
+# How to use: 
+
+### In short : 
 
 simply run:
 ```
-./master.sh --help to see all option 
+./master.sh --help to see all options 
 ```
 
 The script provides several options depending on what you want: 
 
 -o 1: to perform all analyses (TE+gene prediction, GeneSpace, single copy orthogls inference between X/Y,  ds, evoluationary strata inference)
  
--o 2: to ....
+-o 2: to perform TE and gene prediction, as well as synteny analysis (no dS or Strata inference)
 
--o 3: to perform GeneSpace and subsequent analysis 
+-o 3: to perform synteny analysis (from GeneSpace) and subsequent analysis 
 
 -o 4: to perform only Ds and subsequent analysis 
 
--o 5: to only do
+-o 5: to only do only perform GeneSpace/Gene Synteny + Whole Genome Synteny 
 
 -o 6: to only predict TE and genes
 
 -o 7: to perform only the changepoint analysis
+
+
+## Detailed use cases
+
+as described above the workflow is simply run with the command:
+```
+./master.sh -o X #with X an option from 1 to 7. 
+```
+
+each option and their requirement in the config file are described below :
+
+### From genome annotation to strata inference
+
+basically this means running the whole workflow.  
+
+to do so run :
+```./master.sh -o1 2>&1 |tee log```
+
+this will:
+
+*	 Perform TE annotation using **repeatmodeller** (de-novo prediction) and **repeatMasker**
+*	 Perform gene prediction on the softmasked genome using **BRAKER** (with or without RNAseq). 
+*	 Evaluate the quality of the gene prediction (with **BUSCO** mostly)
+*	 Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny including inference of single copy orthologs from **orthofinder**  
+*	Run **paml** to estimate synonymous divergence between the sequences/region of interests
+*	Perform various plots (circos plot, ds along the genome, ideogram, etc) 
+*	Infer the most likely number of evolutionary strata using a changepoint analysis
+
+**data needed:** 
+
+
+# other usefull option: 
+
+### Genome annotation only
+
+to simply perform genome annotation (gene and TE) run :
+```./master.sh -o 6 2>&1 |tee log```
+
+NOTE: if you already have a softmasked genome simply set :
+
+**annotateTE="NO"** in the config file and this step will be skipped
+
+
+
+### Synteny and strata inference from existing data
+
+in case you already have a pair of genome (fasta format) along with their gene prediction (gff):
+
+```./master.sh -o 3 2>&1 |tee log```
+
+This will perform all steps appart from the gene prediction. 
+
+### changepoint only 
+
+```./master.sh -o 7 2>&1 |tee log```
+
+this is usefull to explore various parameter settings in the MCP analysis. 
+For instance you may want to use prior in the MCP (see below) or tweak the order of the scaffolds. 
+
+
+
+
+
+an example config file is provided [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data/example.config)
+
+
+
+### Restart at any step 
+
+the worflow is designed to work at any step in the process. In case of bug you can restart it from whenever it crashes (after fixing the bug) and this should work smoothly.
+
+
+
 
 ## Input data
 
@@ -84,17 +176,19 @@ species-1.fasta will not be valid in GeneSpace. => Use **Species1.fasta** instea
 
 For the chromosome/contig/scaffold ids we recommand a standard naming including the Species name within it without any thing else than alhpanumeric character.  
 
+## Example input data 
 
-## Example input data
-
-
+**/!\ the number of input will vary strongly depending on the analysis you want to perform.**
 several files are **Compulsory** 
 
 see [example data folder](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data) 
 
 
-	* genome1: `example_data/genome1.fa.gz`
-	* genome2: `example_data/genome2.fa.gz`
+	* genome1: 
+	`example_data/genome1.fa.gz`
+		
+	* genome2: 
+	`example_data/genome2.fa.gz`
     * config file: `example_data/example.config`
 
 **Optional data** 
@@ -140,8 +234,9 @@ You can launch the whole workflow by typing:
 
 This will perform steps I to IV as follows:
 
+# Details of the worfklow and results
 
-# I - Perform TE and gene prediction
+## I - Perform TE and gene prediction
 
 ## RNAseq alignment - TE masking - Gene prediction - Quality assessment
 
@@ -182,8 +277,6 @@ Will perform genome annotation without using RNA information.
 If you have already annotated your genome, will use provided gtf for the following steps, effectively skipping genome annotation.
 
 ## Operations of step I
-
-With option *d*, all the following operations are skipped.
 
 ### 1\. Alignment of RNA-seq data (only with option *a*)
 
@@ -250,7 +343,7 @@ If you wish to skip this, comment l.295 of the script `00_scripts/08_braker_resh
 \- **InterProScan** (if option interpro is set to "YES" in the config file and Blast against Uniprot successfully ran)  
 This tool is more time-consuming.
 
-# II - Identify synteny blocks and rearragements
+## II - Identify synteny blocks and rearragements
 
 will enable to infer gene order for dS interpretation 
 
@@ -271,7 +364,7 @@ will enable to infer gene order for dS interpretation
 
 ==Give examples of files for scaffolds, ancestral_chromosome_scaffolds, outgroup_orthofinder and ancestral_outgroup_scaffolds ?==
 
-## Operations of step II
+### Operations of step II
 
 ### 4a. Minimizer alignment and plots of target region
 

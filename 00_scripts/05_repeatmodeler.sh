@@ -39,7 +39,7 @@ fi
 base=$(basename "$genome")
 #--------------DECLARE THE USUAL GENERIQ STUFF: -----------------#
 TIME=$(date +%Y-%m-%d_%Hh%Mm%Ss)
-LOG_FOLDER="log_files"
+LOG_FOLDER="LOGS"
 #create log folder
 mkdir $LOG_FOLDER 2>/dev/null
 NCPUS="$NCPUS_REPEATEMODELER"
@@ -88,7 +88,7 @@ if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
     echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo -e "\terror repeatmodeler failed"
-    echo -e "please check file log_files/repeatmodeler_*log"
+    echo -e "please check file LOGS/repeatmodeler_*log"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     exit 1
 fi
@@ -106,7 +106,7 @@ if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
     echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo -e "\terror repeatmasker failed"
-    echo -e "please check file log_files/F1_repeatmasker_*log"
+    echo -e "please check file LOGS/F1_repeatmasker_*log"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     exit 1
 fi
@@ -139,7 +139,7 @@ if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
     echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo -e "\terror repeatmasker failed"
-    echo -e "please check file log_files/F2_repeatmasker_*log"
+    echo -e "please check file LOGS/F2_repeatmasker_*log"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     exit 1
 fi
@@ -156,7 +156,7 @@ if [[  "${PIPESTATUS[0]}" -ne 0 ]]
 then
     echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo -e "\terror repeatmasker failed"
-    echo -e "please check file log_files/F3_repeatmasker_*log"
+    echo -e "please check file LOGS/F3_repeatmasker_*log"
     echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
     exit 1
 fi
@@ -176,7 +176,7 @@ cat Round*bed >> ../raw."$database".TE.bed
 #then
 #    echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 #    echo -e "\terror repeatmasker failed"
-#    echo -e "please check file log_files/F3_repeatmasker_*log"
+#    echo -e "please check file LOGS/F3_repeatmasker_*log"
 #    echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
 #    exit 1
 #fi
