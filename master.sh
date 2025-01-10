@@ -44,6 +44,8 @@ Help()
     
     -o 7 : perfrom only the changepoint analyis of evolutionary strata
 
+    -o 8 : only draw the plots after the dS computation
+
     All the details of the dat MUST be provided in the config file) \n
     see details in .infos/input_data_info.md
      \n
@@ -918,7 +920,6 @@ if [ "$option" == 1 ]; then
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -929,10 +930,21 @@ if [ "$option" == 1 ]; then
         haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa |\
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
+
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
         
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -941,6 +953,20 @@ if [ "$option" == 1 ]; then
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
             grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
 
         #if all is OK then run GeneSpace - paml etc :
         #TO DO: modifiy the script RunGeneSpace etc to handle case with/without ancestral species
@@ -1032,7 +1058,6 @@ if [ "$option" == 1 ]; then
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1044,9 +1069,20 @@ if [ "$option" == 1 ]; then
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
 
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
+        
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -1054,7 +1090,22 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
+
 
 
         #then run GeneSpace etc :
@@ -1128,7 +1179,6 @@ if [ "$option" == 1 ]; then
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1140,9 +1190,20 @@ if [ "$option" == 1 ]; then
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
 
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
+        
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -1150,7 +1211,22 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
+
 
 
         #then run GeneSpace etc :
@@ -1211,7 +1287,7 @@ if [ "$option" == 1 ]; then
             help
             exit 1
         fi
-        
+
         #handle haplotype2 now - we assumme that haplotype2 is present in the genome of "$haplotype1"
         #we will extract proteins for $haplotype2 from the whole $haplotype1
         #we will remove them from $haplotype1 to create a separate dataset for genespace etc:
@@ -1222,7 +1298,6 @@ if [ "$option" == 1 ]; then
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1234,9 +1309,20 @@ if [ "$option" == 1 ]; then
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
 
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
+        
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -1244,7 +1330,23 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n" >  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
+
+
 
         
         #then run GeneSpace etc :
@@ -1310,7 +1412,9 @@ if [ "$option" == 1 ]; then
             help
             exit 1
         fi
-        
+
+
+
         #handle haplotype2 now - we assumme that haplotype2 is present in the genome of "$haplotype1"
         #we will extract proteins for $haplotype2 from the whole $haplotype1
         #we will remove them from $haplotype1 to create a separate dataset for genespace etc:
@@ -1321,7 +1425,6 @@ if [ "$option" == 1 ]; then
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1333,9 +1436,20 @@ if [ "$option" == 1 ]; then
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
 
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
+        
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -1343,7 +1457,22 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n" >  haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
+
 
 
         #then run GeneSpace etc :
@@ -1430,17 +1559,17 @@ if [ "$option" == 1 ]; then
         fi
         
 
+
         #handle haplotype2 now - we assumme that haplotype2 is present in the genome of "$haplotype1"
         #we will extract proteins for $haplotype2 from the whole $haplotype1
         #we will remove them from $haplotype1 to create a separate dataset for genespace etc:
         mkdir -p haplo2/03_genome
 
-        #linearise genome of haplo1 and extract scaffold to study:
+        #linearise genome of haplo1  and extract scaffold to study:
         awk '$0~/^>/{if(NR>1){
         print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
           haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
         
-        #
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1452,9 +1581,20 @@ if [ "$option" == 1 ]; then
         grep -A1 "$haplotype2"  \
         > haplo2/08_best_run/"$haplotype2"_prot.final.clean.fa
 
+
+        #extract the corresponding CDS: 
+        awk '$0~/^>/{if(NR>1){
+        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        haplo1/08_best_run/"$haplotype1".spliced_cds.fa |\
+        grep -A1 "$haplotype2"  \
+        > haplo2/08_best_run/"$haplotype2".spliced_cds.fa
+
+        
         #then we must create a sub file from haplotype1 by excluding haplotype2 from within it:
         cp haplo1/08_best_run/"$haplotype1".final.gtf haplo1/08_best_run/"$haplotype1".final.gtf.bkp
         cp haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa.bkp
+        cp haplo1/08_best_run/"$haplotype1".spliced_cds.fa haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        cp haplo1/03_genome/"$haplotype1".fa haplo1/03_genome/"$haplotype1".fa.bkp 
         
         grep -v "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf.bkp > haplo1/08_best_run/"$haplotype1".final.gtf
         #remove seq:
@@ -1462,7 +1602,22 @@ if [ "$option" == 1 ]; then
         awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
             else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
             |\
-            grep -v "$haplotype2" |tr "\t" "\n" > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
+        
+        #remove seq from CDS file:
+        input=haplo1/08_best_run/"$haplotype1".spliced_cds.fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/08_best_run/"$haplotype1".spliced_cds.fa
+
+        #remove from genome
+        input=haplo1/03_genome/"$haplotype1".fa.bkp
+        awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } 
+            else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$input" \
+            |\
+            grep -v "$haplotype2" |tr "\t" "\n"  > haplo1/03_genome/"$haplotype1".fa
+
 
 
         #then run GeneSpace etc :
@@ -2304,6 +2459,32 @@ elif [ "$option" == 7 ] ; then
         echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
         exit 1
     fi
+
+elif [ "$option" == 8 ] ; then
+
+    echo "----------------------------------------------------------------"
+    echo "         only plots after ds will be launched                   "
+    echo "               checking config files settings                   "
+    echo "----------------------------------------------------------------"
+
+    opt="plots"
+    ./00_scripts/11_run_GeneSpace_paml_ideogram.sh \
+        -s1 "$haplotype1" \
+        -s2 "$haplotype2" \
+        -a "$ancestral_genome" \
+        -g "$ancestral_gff" \
+        -c "$scaffold" \
+        -o "$opt" 2>&1 |\
+        tee LOGS/log_GeneSpace_and_Co
+    if [[  "${PIPESTATUS[0]}" -ne 0 ]]
+    then
+        echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        echo -e "error some steps failed during GeneSpace/Ds analyses"
+        echo -e "please check file LOGS/log_GeneSpace"
+        echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
+        exit 1
+    fi
+
 
 fi
 

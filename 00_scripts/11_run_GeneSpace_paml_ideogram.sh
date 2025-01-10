@@ -1,4 +1,4 @@
-
+#!/bin/bash
 #Purpose:
 #master script to prepare bed files, laucnch GeneSpace, run paml and launch downstream Rscript 
 #will check existence of all dependencies
@@ -116,6 +116,9 @@ fi
 if [[ $options = "Ds_only" ]] ;  
 then
     mkdir -p 02_results/paml 02_results/plots
+elif [[ $options = "plots" ]] ; 
+then
+    mkdir -p 02_results/plots
 elif [[ $options = "synteny_and_Ds" ]] ; 
 then
     rm -rf genespace peptide 02_results/paml 02_results/plots  #2>/dev/null
@@ -337,6 +340,7 @@ if [[ $options = "Ds_only" ]] ; then
         grep -Ff <(cut -f 2 02_results/scaff.haplo1.haplo2.txt ) 02_results/paml/single.copy.orthologs \
             |grep -Ff <(cut -f3 02_results/scaff.haplo1.haplo2.txt ) - > 02_results/paml/single.copy.orthologs_cleaned
 
+
     else
         #ancestral genome not provided  
         ./00_scripts/extract_singlecopy.sh -h1 "$haplo1" -h2 "$haplo2" -s "$scaffold"
@@ -350,15 +354,17 @@ if [[ $options = "Ds_only" ]] ; then
         grep -Ff <(cut -f 2 02_results/scaff.haplo1.haplo2.txt ) 02_results/paml/single.copy.orthologs \
             |grep -Ff <(cut -f3 02_results/scaff.haplo1.haplo2.txt ) - > 02_results/paml/single.copy.orthologs_cleaned
 
+
     fi
 fi
 
-#cut  -f3 02_results/paml/single.copy.orthologs_cleaned > 02_results/paml/sco."$haplo1".txt
-#cut  -f4 02_results/paml/single.copy.orthologs_cleaned > 02_results/paml/sco."$haplo2".txt
-
-cut  -f3 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo1".txt
-cut  -f4 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo2".txt
-
+if [ -n "${ancestral_genome}" ]; then
+    cut  -f3 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo1".txt
+    cut  -f4 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo2".txt
+else
+    cut  -f2 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo1".txt
+    cut  -f3 02_results/paml/single.copy.orthologs > 02_results/paml/sco."$haplo2".txt
+fi
 #------------------------------ step 3 run paml  -------------------------------------------------------------#
 
 if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then 
@@ -382,7 +388,10 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
         -s "$scaffold" || { echo -e "${RED} ERROR! paml failed - check your data\n${NC} " ; exit 1 ; }
     fi
     
-    
+fi
+
+if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $options = "plots" ]] ; then 
+
     pamlsize=$(wc -l 02_results/paml/results_YN.txt |awk '{print $1}' ) 
     scpo=$(wc -l 02_results/paml/single.copy.orthologs_cleaned |awk '{print $1}' )
     
@@ -419,9 +428,8 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
     samtools faidx haplo2/03_genome/"$haplo2".fa
     
     eval "$(conda shell.bash hook)"
-    #conda activate superannot
+    conda activate superannot
     #conda deactivate 
-
     if [  -n "${ancestral_genome}" ] ; then
         echo -e "ancestral genome was provided for inference" 
         #we will make an ideogram with it 
@@ -511,41 +519,61 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
     
     
     ## --------------------------------Make Synteny table -------------------------------------------
-    is_anc='TRUE'
-    if [ -n "${ancestral_genome}" ] ; then
-    
-        is_anc='TRUE'
-    else
-    
-        is_anc='FALSE'
-    fi
+    # is_anc='TRUE'
+    # if [ -n "${ancestral_genome}" ] ; then
+    # 
+    #     is_anc='TRUE'
+    # else
+    # 
+    #     is_anc='FALSE'
+    # fi
     
     #path_orthofinder='genespace/orthofinder/Results_*/'
     #path_bed='genespace/bed/'
     #python3 00_scripts/utility_scripts/02.Make_synteny_table.py "${haplo1}" "${haplo2}" \
     #    "${path_orthofinder}" "${path_bed}" "${is_anc}" ancestral_sp
-    ancestral=$(head -n1 ancestral_sp/ancestral_sp.fa.fai \
-            |cut -f1 \
-            |awk '{gsub("_","\t",$0) ; print $1}')
-        
-    echo "ancestral genome ID is $ancestral " 
 
     #this part has been done elsewhere and should be removed:
     pathN0="genespace/orthofinder/Results_*/Phylogenetic_Hierarchical_Orthogroups/N0.tsv"
     haplo=$(head -n1 $pathN0 |awk '{print $7}')
-    if [[ $haplo1 == $haplo ]] ;
+
+    if [ -n "${ancestral_genome}" ]
     then
-          echo " " ;
-        awk -v var1="$haplo1" -v var2="$haplo2" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
-        | grep -Ff <(awk '{print $2}' "$scaffold") - > orthologues
-    sed -i -e "s/\r//g" orthologues
+     ancestral=$(head -n1 ancestral_sp/ancestral_sp.fa.fai \
+            |cut -f1 \
+            |awk '{gsub("_","\t",$0) ; print $1}')
+        
+    echo "ancestral genome ID is $ancestral " 
+      
+       if [[ $haplo1 == $haplo ]] ;
+       then
+             echo " " ;
+           awk -v var1="$haplo1" -v var2="$haplo2" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
+           | grep -Ff <(awk '{print $2}' "$scaffold") - > orthologues
+       sed -i -e "s/\r//g" orthologues
+       else
+           echo "not egal - reversing haplotype names to match columns"
+           awk -v var1="$haplo2" -v var2="$haplo1" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
+           | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$4"\t"$6}' > orthologues
+           sed -i -e "s/\r//g" orthologues
+      fi
+
     else
-        echo "not egal - reversing haplotype names to match columns"
-        awk -v var1="$haplo2" -v var2="$haplo1" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
-        | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$4"\t"$6}' > orthologues
-        sed -i -e "s/\r//g" orthologues
-   fi
-   
+	#assuming no ancestral species: 
+       if [[ $haplo1 == $haplo ]] ;
+       then
+           echo " " ;
+           awk -v var1="$haplo1" -v var2="$haplo2" 'NF==5 && $4 ~ var1 && $5 ~ var2 ' $pathN0 \
+           | grep -Ff <(awk '{print $2}' "$scaffold") - > orthologues
+           sed -i -e "s/\r//g" orthologues
+       else
+           echo "not egal - reversing haplotype names to match columns"
+           awk -v var1="$haplo2" -v var2="$haplo1" 'NF==5 && $4 ~ var1 && $5 ~ var2 ' $pathN0 \
+           | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$4}' > orthologues
+           sed -i -e "s/\r//g" orthologues
+       fi
+    fi
+
     #creating different synteny table 
     #note: we already have that with the joint bed from the ideogram 
     #this is redundant 
@@ -616,23 +644,24 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
         echo "no ancestral species assumed "
         echo "inferring synteny between $haplo1 and $haplo2"
 
-    #   join  -1 4 -2 4 <(sort -k4,4 orthologues)  \
-    #                    <(sort -k4,4 genespace/bed/"$haplo1".bed ) \
-    #        | sed 's/ /\t/g' \
-    #        | join -1 5 -2 4 <(sort -k5,5 -) \
-    #                       <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
-    #        |awk 'NR==1 {print "HOG\tOG\tN0\tchrom1\tGene1\tstart1\tend1\tchrom2\tGene2\tstart2\tend2"}
-    #                {print $3"\t"$4"\t"$5"\t"$7"\t"$2"\t"$8"\t"$9"\t"$10"\t"$1"\t"$11"\t"$12}' \
-    #        > synteny_"$haplo1"_"$haplo2".txt
-    #
-    #     if [ -s synteny_"$haplo1"_"$haplo2".txt ] ;
-    #     then
-    #         size3=(wc -l   synteny_"$haplo1"_"$haplo2".txt)
-    #     else
-    #         echo "synteny file between $haplo1 and $haplo2 is empty"
-    #         echo "please check your data"
-    #         exit 1
-    #     fi
+
+       join  -1 4 -2 4 <(sort -k4,4 orthologues)  \
+                       <(sort -k4,4 genespace/bed/"$haplo1".bed ) \
+            | sed 's/ /\t/g' \
+            | join -1 5 -2 4 <(sort -k5,5 -) \
+                           <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+            |awk 'NR==1 {print "HOG\tOG\tN0\tchrom1\tGene1\tstart1\tend1\tchrom2\tGene2\tstart2\tend2"}
+                    {print $3"\t"$4"\t"$5"\t"$6"\t"$2"\t"$7"\t"$8"\t"$9"\t"$1"\t"$10"\t"$11}'   \
+	    > 02_results/synteny_"$haplo1"_"$haplo2".txt
+
+         if [ -s 02_results/synteny_"$haplo1"_"$haplo2".txt ] ;
+         then
+             size3=(wc -l 02_results/synteny_"$haplo1"_"$haplo2".txt)
+         else
+             echo "synteny file between $haplo1 and $haplo2 is empty"
+             echo "please check your data"
+             exit 1
+         fi
                    
          echo -e "number of lines in synteny file $haplo1 vs $haplo2 is $size3"
 
@@ -640,26 +669,42 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
 
     
     # ---------------------------------- step6 -- create circos plot --------------------------------
-    #to do: entierely rewrite the Rscripts below 
+    #to do: entierely rewrite these parts of script below :
     #circos plot here:
     #source config/config #to get the chromosomes 
     #/!\ chromosomes should be reconstructed on the fly from the N0.tsv file
+    file="02_results/paml/single.copy.orthologs"
+    if [ -n "${ancestral_genome}" ]
+    then
+        awk '{gsub("_g[0-9]*.t[1-9]","\t",$0); print $2"\t"$3"\t"$4}' $file \
+           |sort \
+	   |uniq -c\
+	   |awk -v var1="$ancestral" -v var2="$haplo1" -v var3="$haplo2" '$1>5 {print var1"\t"$2"\n"var2"\t"$3"\n"var3"\t"$4}' \
+           |sort \
+           |uniq  \
+	    > 02_results/chromosomes.txt
+    else
+        awk '{gsub("_g[0-9]*.t[1-9]","\t",$0); print $2"\t"$3"\t"$4}' $file \
+           |sort \
+	   |uniq -c\
+           |awk -v var1="$haplo1" -v var2="$haplo2" '$1>5 {print var1"\t"$2"\n"var2"\t"$3}' \
+           |sort \
+           |uniq  \
+	    > 02_results/chromosomes.txt
 
-     awk '{gsub("_","\t",$0) ; print $2"\t"$2"_"$3"_"$4"\t"$6"\t"$6"_"$7"\t"$9"\t"$9"_"$10}' 02_results/paml/single.copy.orthologs\
-            |sort \
-            |uniq -c\
-            |awk '$1>5 {print $2"\t"$3"\n"$4"\t"$5"\n"$6"\t"$7} ' |sort|uniq > 02_results/chromosomes.txt
+    fi
     chromosomes="02_results/chromosomes.txt"
 
-
     echo -e "\n~~~~~~~~~~~~~~~contstructing circos plots ~~~~~~~~~~~~~~~~~~~"
-    if [ ! -z "${ancestral_genome}" ] ; then
+    if [ -n "${ancestral_genome}" ] ; then
 
         echo "ancestral genome was provided" 
 
-        
+        source config/config
+
+       #TO DO : simplify below code so that it will work more generally    
        #TO DO : test if links were provided by the user and launch code appropriately       
-        if [ ! -z "$links" ] ; then
+        if [ -n "$links" ] ; then
             echo "links file were provided"
             if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
                 -c "$chromosomes" \
@@ -668,8 +713,6 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                 -g haplo1/03_genome/"$haplo1".fa.fai \
                 -i genespace/bed/ancestral_sp.bed  \
                 -j genespace/bed/"$haplo1".bed  \
-                #-t ancestral_sp/ancestral_sp.TE.bed \
-                #-u haplo1/03_genome/"$haplo1".TE.bed  \
                 -l "$links"
             then
                 echo -e "\nERROR: circos plots failed /!\ \n
@@ -683,8 +726,6 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                 -g haplo2/03_genome/"$haplo2".fa.fai \
                 -i genespace/bed/ancestral_sp.bed  \
                 -j genespace/bed/"$haplo2".bed  \
-                #-t ancestral_sp/ancestral_sp.TE.bed \
-                #-u haplo2/03_genome/"$haplo2".TE.bed  \
                 -l "$links"
             then
                 echo -e "\nERROR: circos plots failed /!\ \n
@@ -692,6 +733,8 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                 exit 1
             fi
             if [[ $annotateTE = "YES" ]] ; then
+	        echo "assuming TE bed file exist"
+       	    	echo "assuming links"
                 #bed file of TE should exist:
                 if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
@@ -709,6 +752,9 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                     exit 1
                 fi
             else #assume no TE: 
+		echo "assuming no TE bed files"
+       	    	echo "assuming links"
+
                 if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
                     -y  02_results/synteny_"$haplo1"_"$haplo2".txt  \
@@ -716,8 +762,6 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                     -g haplo2/03_genome/"$haplo2".fa.fai \
                     -i genespace/bed/"$haplo1".bed  \
                     -j genespace/bed/"$haplo2".bed  \
-                    #-t haplo1/03_genome/"$haplo1".TE.bed \
-                    #-u haplo2/03_genome/"$haplo2".TE.bed \
                     -l "$links"
                 then
                     echo -e "\nERROR: circos plots failed /!\ \n
@@ -727,6 +771,9 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
             fi
 
         else 
+       	    echo "assuming no links"
+	    echo "assuming no TE"
+	    echo "plotting between ancestral genome and haplotype1"
             if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
                 -c "$chromosomes" \
                 -y 02_results/synteny_ancestral_sp_"$haplo1".txt \
@@ -742,7 +789,9 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                 exit 1
             fi
         fi
-
+	    echo "assuming no links"
+	    echo "assuming no TE"
+	    echo "plotting between ancestral genome and haplotype2"
             if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo2" \
                 -c "$chromosomes" \
                 -y 02_results/synteny_ancestral_sp_"$haplo2".txt \
@@ -760,6 +809,8 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
 
             if [[ $annotateTE = "YES" ]] ; then
                 #bed file of TE should exist:
+	    	echo "assuming no TE"
+	    	echo "plotting between haplotype1  and haplotype2"
 
                if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                    -c  "$chromosomes" \
@@ -782,7 +833,7 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                    -f  haplo1/03_genome/"$haplo1".fa.fai \
                    -g haplo2/03_genome/"$haplo2".fa.fai \
                    -i genespace/bed/"$haplo1".bed  \
-                   -j genespace/bed/"$haplo2".bed  \
+                   -j genespace/bed/"$haplo2".bed  
                then
                    echo -e "\nERROR: circos plots failed /!\ \n
                    please check logs and input data\n" 
@@ -792,10 +843,12 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
 
     else
         echo "no ancestral genome" 
-        if [ ! -z "$links" ] ; then
+   	echo "plotting between haplotype1  and haplotype2"
+        if [ -n "$links" ] ; then
+            echo "links file were provided"
             if [[ $annotateTE = "YES" ]] ; then
             #bed file of TE should exist:
-            echo "links file were provided"
+	        echo "TE bed file are assumed to exist"
                 if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
                     -y  02_results/synteny_"$haplo1"_"$haplo2".txt  \
@@ -812,6 +865,7 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                     exit 1
                 fi
             else
+	        echo "no TE bed file are assumed to exist"
                if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
                     -y  02_results/synteny_"$haplo1"_"$haplo2".txt  \
@@ -825,11 +879,12 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                     please check logs and input data\n" 
                     exit 1
                 fi
-
+            fi
        else
-
+            echo "no links file were provided"
             if [[ $annotateTE = "YES" ]] ; then
-            #bed file of TE should exist:
+	        echo "TE bed file are assumed to exist"
+                #bed file of TE should exist:
                 if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
                     -y  02_results/synteny_"$haplo1"_"$haplo2".txt  \
@@ -845,13 +900,14 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
                     exit 1
                 fi
             else
+                echo "no TE bed file are assumed to exist"
                 if ! Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
                     -c  "$chromosomes" \
                     -y  02_results/synteny_"$haplo1"_"$haplo2".txt  \
                     -f  haplo1/03_genome/"$haplo1".fa.fai \
                     -g haplo2/03_genome/"$haplo2".fa.fai \
                     -i genespace/bed/"$haplo1".bed  \
-                    -j genespace/bed/"$haplo2".bed  \
+                    -j genespace/bed/"$haplo2".bed  
                 then
                     echo -e "\nERROR: circos plots failed /!\ \n
                     please check logs and input data\n" 
@@ -874,7 +930,7 @@ if [[ $options = "synteny_and_Ds" ]] || [[ $options = "Ds_only" ]] ; then
     #run minimap on the genome 
     #assumption : each genome MUST BE located in folder 03-genome
     
-    
+   exit  
     #------------------------ step 8 -- model comparison -------------------------------------------------#
     mkdir 02_results/modelcomp/
     echo -e "\n\n~~~~~~~~~~~\n\trunning changepoint\n~~~~~~~~~~~~~~~\n"

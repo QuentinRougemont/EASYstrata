@@ -63,12 +63,8 @@ if file --mime-type "$TEdatabase" | grep -q gzip$; then
    TEdatabase=${TEdatabase%.gz}
 else
    echo "$TEdatabase is not gzipped"
-   TEdatabase=$TEdatabase
+   TEdatabase=${TEdatabase%.gz} #just in case
 fi
-
-#this should be deprecated:
-#sed 's/ [0-9A-Za-z=-]*//g' $genome > ${genome%.fa}.simpl.fa
-#genome=${genome%.fa}.simpl.fa
 
 base=$(basename "$genome" )
 
@@ -162,14 +158,17 @@ then
 fi
 awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER3"/"$database".fa.masked.masked.out |sed '1,3d' > Round3.bed
 
-FOLDER4=FOLDER4_"${base}"_mask.$TIME
-mkdir "$FOLDER4"
+#FOLDER4=FOLDER4_"${base}"_mask.$TIME
+#mkdir "$FOLDER4"
 
 #run repeatmasker:
-awk '$0~/^>/{if(NR>1){print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' "$database"-families.fa |\
-    grep -A1 Unknown |sed '/^--$/d' > unknown.fa
+#awk '$0~/^>/{if(NR>1){print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' "$database"-families.fa |\
+#    grep -A1 Unknown |sed '/^--$/d' > unknown.fa
 
 cat Round*bed >> ../raw."$database".TE.bed
+#make overly simplistic bed: 
+grep -v "Simple\|Low" ../raw."$database".TE.bed > ../03_genome/"$genome".TE.bed
+
 #RepeatMasker -pa 18 -e ncbi -lib unknown.fa  -dir "$FOLDER4" "$FOLDER3"/"$base".masked.masked.masked 2>&1 | \
 #    tee ../$LOG_FOLDER/F4_repeatmasker_"$base"."$TIME".log  ||\
 #if [[  "${PIPESTATUS[0]}" -ne 0 ]]

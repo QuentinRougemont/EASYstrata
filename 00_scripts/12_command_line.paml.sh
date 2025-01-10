@@ -277,15 +277,24 @@ done < wanted_sequence 2>&1 |tee log.paml
 rm results_YN.txt 2>/dev/null   
 cat sequence_files/tmp.*/resultat_Yang_Nielsen_2000_method.orthogp.txt >> results_YN.txt
 cp results_YN.txt results_YN.txt.bkp
-if [ -e correspondance.table.hap1.txt ] ; then
+
+
+if [ -e correspondance.table.hap1.txt ] && [ ! -e correspondance.table.hap2.txt ] ; then
    sed -i 's/>//g' correspondance.table.hap1.txt
    awk 'NR==FNR{a[$2]=$1;next}$5 in a{$5=a[$5]}1' correspondance.table.hap1.txt results_YN.txt > tmp
+   mv tmp results_YN.txt
 fi
 
-if [ -e correspondance.table.hap2.txt ] ; then
+if [ -e correspondance.table.hap2.txt ] && [ -e correspondance.table.hap1.txt ] ; then
+   sed -i 's/>//g' correspondance.table.hap1.txt
+   awk 'NR==FNR{a[$2]=$1;next}$5 in a{$5=a[$5]}1' correspondance.table.hap1.txt results_YN.txt > tmp
+
    sed -i 's/>//g' correspondance.table.hap2.txt
-   awk 'NR==FNR{a[$2]=$1;next}$6 in a{$6=a[$6]}1' correspondance.table.hap1.txt tmp
+   awk 'NR==FNR{a[$2]=$1;next}$6 in a{$6=a[$6]}1' correspondance.table.hap2.txt tmp > results_YN.txt
 fi
 
-mv tmp results_YN.txt
-
+if [ -e correspondance.table.hap2.txt ] && [ ! -e correspondance.table.hap1.txt ]  ; then
+   sed -i 's/>//g' correspondance.table.hap2.txt
+   awk 'NR==FNR{a[$2]=$1;next}$6 in a{$6=a[$6]}1' correspondance.table.hap2.txt results_YN.txt > tmp
+   mv tmp results_YN.txt
+fi

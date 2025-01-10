@@ -483,3 +483,20 @@ then
 fi
 ```
 
+
+## subread - featureCounts: 
+```
+command='featureCounts' 
+if ! command -v $command &> /dev/null
+then
+    #direct install: 
+    wget https://sourceforge.net/projects/subread/files/subread-2.0.8/subread-2.0.8-Linux-x86_64.tar.gz/download -O subread-2.0.8-Linux-x86_64.tar.gz
+    tar zxvf subread-2.0.8-Linux-x86_64.tar.gz 
+    cd subread-2.0.8-Linux-x86_64/bin
+    path=$(pwd)
+    echo -e "\n#Path to translatorx\n export PATH=\$PATH:$path" >> ~/.bashrc 
+    source ~/.bashrc  
+    cd ../../
+fi
+```
+

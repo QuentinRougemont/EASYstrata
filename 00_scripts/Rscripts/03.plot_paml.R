@@ -135,7 +135,7 @@ if (argv[1]=="-h" || length(argv)==0){
         #plotting along the X:
         writeLines("merging all data\n\n")
         all <- merge(bedSp1, scaf, by.x = "scaff", by.y = "chr") %>%
-            left_join(., Ds_table, by=join_by(gene == gene) ) %>%
+            left_join(., Ds_table, by=join_by(geneX == gene) ) %>%
             arrange(scaff, start, sort =F) %>%
             group_by(scaff) %>%
             mutate(St = ifelse(order == "N", start, rev(start) )) %>% 

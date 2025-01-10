@@ -14,10 +14,8 @@ ancestral_gff=" "   #full path to the associated gff to be used whehever possibl
 #--- annotate or not #
 annotate=""  #a string (YES/NO)? if annotation = YES then annotation of the genomes will be performed
              #else gtf and fastafiles are expected and only the paml/ds/genespace etc will be performed
-RelatedProt="" #/path/to/related_protein.fa" #a full path to a set of external protein data (fasta format) for braker
+RelatedProt="" #/path/to/related_protein.fa" #a full path to a set of external protein data (fasta format) for braker (optional if orthoDB is used instead)
 fungus="" #YES or NO set to YES if species is a fungus
-
-## orthoDB ###
 orthoDBspecies="" #one of : "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata"
 #if a species is given then it will be used for annotation (in addition to eventual RNAseq and orthProteins) 
 
@@ -25,7 +23,6 @@ orthoDBspecies="" #one of : "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" 
 #if annotate = NO then gtf should be provided: 
 gtf1=""
 gtf2=""
-
 
 #----- optional --------
 #RNASeq data ?
@@ -39,9 +36,12 @@ bamlist2="/full/path/to/bam.aligned_on_genome2.txt" #list of bam on genome2
 #---- COMPULSORY INFOS ------
 #TE INFO:
 annotateTE="" #YES/NO
-TEdatabase="" #a full path to a custom database of species/genus species TE
+TEdatabase="" #a full path to a custom database of species/genus species TE (not needed if genome already softmasked)
 #NCBI species for de-novo TE:
 ncbi_species=""
+#if annotateTE="NO" you may want to provide bed formatted TE elements to display on circos plots:
+#TEgenome1=""
+#TEgenome2=""
 
 #BUSCO SPECIFIC ARGUMENTS:
 #busco_lineage name:

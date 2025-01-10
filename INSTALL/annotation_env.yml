@@ -66,4 +66,5 @@ dependencies:
   - r-rideogram=0.2.2
   - r-mcp=0.3.4
   - r-tidyverse=2.0.0
+  - r-glue=1.8.0
     #r-data.table=1.16.4

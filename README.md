@@ -75,13 +75,15 @@ The script provides several options depending on what you want:
 
 -o 3: to perform synteny analysis (from GeneSpace) and subsequent analysis 
 
--o 4: to perform only Ds and subsequent analysis 
+-o 4: to perform only d*S* and subsequent analysis 
 
 -o 5: to only do only perform GeneSpace/Gene Synteny + Whole Genome Synteny 
 
 -o 6: to only predict TE and genes
 
 -o 7: to perform only the changepoint analysis
+
+-o 8: to only perform the plots after dS computations
 
 
 ## Detailed use cases
@@ -93,11 +95,15 @@ as described above the workflow is simply run with the command:
 
 each option and their requirement in the config file are described below :
 
+an example config file is provided [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data/example.config)
+
+
 ### From genome annotation to strata inference
 
 basically this means running the whole workflow.  
 
-to do so run :
+to do so run : 
+
 ```./master.sh -o1 2>&1 |tee log```
 
 this will:
@@ -110,17 +116,15 @@ this will:
 *	Perform various plots (circos plot, ds along the genome, ideogram, etc) 
 *	Infer the most likely number of evolutionary strata using a changepoint analysis
 
-**data needed:** 
 
+### other usefull option: 
 
-# other usefull option: 
-
-### Genome annotation only
+* **Genome annotation only**
 
 to simply perform genome annotation (gene and TE) run :
 ```./master.sh -o 6 2>&1 |tee log```
 
-NOTE: if you already have a softmasked genome simply set :
+NOTE: if you already have a softmasked genome simply set :  
 
 **annotateTE="NO"** in the config file and this step will be skipped
 
@@ -128,24 +132,50 @@ NOTE: if you already have a softmasked genome simply set :
 
 ### Synteny and strata inference from existing data
 
-in case you already have a pair of genome (fasta format) along with their gene prediction (gff):
+in case you already have a pair of genome (fasta format) along with their gene prediction (gff):    
 
 ```./master.sh -o 3 2>&1 |tee log```
 
-This will perform all steps appart from the gene prediction. 
+This will perform all steps appart from the gene prediction.  
+
+### dS strata inference from existing data
+
+in case you already have a pair of genome (fasta format) along with their gene prediction (gff) and the dS computed from previous step.
+
+```./master.sh -o 4 2>&1 |tee log```
+
+This will perform all steps after the dS.  
+
+Mostly usefull for debugging  
+
+### Only for synteny analysis 
+
+in case you already have a pair of genome (fasta format) along with their gene prediction (gff):
+
+```./master.sh -o 4 2>&1 |tee log```
+
+This will only run GeneSpace and minimap and perform some plots.
+
+Mostly usefull for debugging or if you are not interested in Strata.
+
+
 
 ### changepoint only 
+
+run simply:  
 
 ```./master.sh -o 7 2>&1 |tee log```
 
 this is usefull to explore various parameter settings in the MCP analysis. 
 For instance you may want to use prior in the MCP (see below) or tweak the order of the scaffolds. 
 
+### plots only:
 
+run simply:  
 
+```./master.sh -o 8 2>&1 |tee log```
 
-
-an example config file is provided [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data/example.config)
+this is usefull to make only the plot after the dS computation, for exemple, you may want to change some options in the R plot after a first pass analysis with default parameters.
 
 
 
@@ -156,83 +186,83 @@ the worflow is designed to work at any step in the process. In case of bug you c
 
 
 
-## Input data
-
-Your **input data** may be
-
-\- one genome containing both sex/mating type chromosomes
-
-\- or two haplotypes containing each one of the sex/mating type chromosomes.
-
-\+ RNAseq data for each genome (optional) + a custom TE database (compulsory for annotation) 
-
-
-==** Warning names** ==
-we recommend to use short name for each of your genome assemblies name and avoid any special characters appart from underscore.
-
-**For instance:**
-
-species-1.fasta will not be valid in GeneSpace. => Use **Species1.fasta** instead.
-
-For the chromosome/contig/scaffold ids we recommand a standard naming including the Species name within it without any thing else than alhpanumeric character.  
-
-## Example input data 
+## Input data 
 
 **/!\ the number of input will vary strongly depending on the analysis you want to perform.**
 several files are **Compulsory** 
 
-see [example data folder](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data) 
+**1 - genome assemblies:**
+Your **input data** may be
+\- one genome assembly containing both sex/mating type chromosomes
+
+\- or **ideally:** two separate haplotypes assemblies containing each one of the sex/mating type chromosomes.
+
+**Warning names of fasta and contigs/scaffold/chromosomes :**
+we recommend to use short name for each of your genome assemblies name and avoid any special characters appart from underscore.
+
+**For instance:**
+species-1.fasta will not be valid in GeneSpace. => Use **species1.fasta** instead.
+
+For the chromosome/contig/scaffold ids we recommand a standard naming including the Species name within it without any thing else than alhpanumeric character.  
+\- example: **species1_chr1** or **species1_contigX** or **species1_scaffoldZ**
+
+**2 - other input data** 
+additional input data will be highly dependent on the analysis you want to perform (full workflow or not).
+These must be specified in the [**config file**](https://github.com/QuentinRougemont/EASYstrata/blob/main/config/config) and will typically include:  
+
+* 2.1 - **ancestral genome**  optional but highly recommended: the link to an ancestral genome to plot the gene order - ideal to infer more accurately single copy orthologs  
+* 2.2 - **ancestral gff**  optional but highly recommanded:  the gene prediction associated with the ancestral genome 
+* 2.3 - **BUSCO lineage name** : compulsory for genome annotation: the name of the BUSCO lineage from your species (available through busco --list-lineage)) 
+
+**for genome annotation:**  
+
+* 2.4 - **RNAseq** data for each genome (optional): to improve BRAKER annotation  (can also be bam files)  
+* 2.5 - **Proteins for annotation (optional)** : if no protein data are available we will use orthoDB12  (downloaded automatically)
+* 2.6 - **orthoDB12 species name** : a lineage species name among: 
+ "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata"
+
+**for TE prediction:**  
+
+* 2.7 - **TE database** : compulsory for genome annotation if genome not softmasked already: the name of the TE database (some are available online depending on your taxon) 
+* 2.8 - **NCBI taxon** : compulsory: a taxon name for NCBI (used with repeatmasker)  
+* 2.9 - **TE bed files** :  optional: a pairs of bed file containing TE for your region of interest if already available (to display on circos plots)
+
+**for evolutionary strata - circos plot - ideogram - etc** 
+* 2.10 -  **scaffold.txt**: a tab sepearate file containing the genome name, and scaffold ids of the ancestral genome.  
+
+for mor on the format needed see [example data folder](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data) 
 
 
-	* genome1: 
-	`example_data/genome1.fa.gz`
-		
-	* genome2: 
-	`example_data/genome2.fa.gz`
-    * config file: `example_data/example.config`
-
-**Optional data** 
-
-	* ancestral genome: `example_data/Mlag129A1.fa.gz`
-	* ancestral gff: `example_data/Mlag129A1.gtf.gz`
-	* RNAseq data:  `example_data/rnaseq.fq.gz`
-
-
-**TE data (compulsory)** 
-
-	* custom database: `example_data/TE.fa.gz`
-
-
-**Proteins for annotation (optional)**
-
-	* example_data/prot.fa 
-	  note: if no protein data are available we will use orthoDB12  (downloaded automatically)
-      
-    for orthoDB12 users *must* provide a lineage name among "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata"
+##  Full config file details:
 
 
 | option in config | description |
 | --- | --- |
-| *genome1* | Full path to the assembly of the genome or haplotype you wish to analyse. |
-| *haplotype1* | Name of the genome1 |
-| \[*genome2*\] | Full path to the assembly of the second haplotype you with to analyse. Only for the case where you have two haplotypes, each containing one of the sex/mating type chromosomes. |
-| \[*haplotype2*\] | Compulsory if *genome2* is given. Name of the second haplotype. |
+| *genome1* | **Compulsory:** Full path to the assembly of the genome or haplotype you wish to analyse. |
+| *haplotype1* | **Compulsory:** Name of the genome1 to be used as a /contig/scaffold/chromosome basename |
+| \[*genome2*\] | **Optional:** Full path to the assembly of the second haplotype you wish to analyse. Only for the case where you have two haplotypes, each containing one of the sex/mating type chromosomes. |
+| \[*haplotype2*\] | **Compulsory:** Name of the second haplotype. This can be a basename of all chromosome if a second assembly is avaiable, or the name of the scaffold/contig/chromosomes corresponding to the sex/MAT chromosome (e.g. species_chrY) |
+| annotate | **Compulsory:** a string "YES"/"NO" stating wether genome should be annotated or not|
+| *RelatedProt* | **Optional:** Full path to a fasta file containing protein sequences to be used for gene prediction. |
+| \[*RNAseqlist*\] | **Optional:**: Full path to a '.txt' file containing the list of RNA-seq data files. |
+| \[*bamlist1*\] | **Optional:**. Full path to a .txt file containing the list of bam files for *genome1* (alignment of RNA-seq data onto the fasta of *genome 1*). |
+| \[*bamlist2*\] | **Optional:** with option *b* and if *genome2* is given. Full path to a .txt file containing the list of bam files for genome2 (alignment of RNA-seq data onto the fasta of *genome 2*). |
+| \[*orthoDBspecies*\] | **Compulsory:** "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata". Will use a database from **orthoDB** for gene prediction. |
+| *fungus* | **Compulsory:** "YES" or "NO" (default), whether your species is a fungus. |
+| annotateTE | **Compulsory:** a string "YES"/"NO" stating wether genome should be annotated or not|
+| *TEdatabase* | **Compulsory for annotation of TE:** Full path to a database of TE for your species/genus, used in TE prediction, in fasta format. |
+| *ncbi_species* | **Compulsory for annotation of TE:** Name of the ncbi species, used in TE prediction. ==list available [here](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi)== |
+| \[*gtf1*\] | **Optional**. Full path to a .gtf file for an existing gene prediction on *genome1*. |
+| \[*gtf2*\] | **Optional** Full path to a .gtf file for an  existing gene prediction on *genome2*. |
+| *busco_lineage* | Lineage used for **busco** analysis. You can access the list of available lineages by typing `busco --list-dataset`. |
+| *interpro* | YES or NO (default), whether **interproscan** quality check of the genome annotation should be performed. Warning: this can take up to several days for a big dataset. |
+| \[*ancestral_genome*\] | Compulsory if *ancestral* is set as "outgroup". Full path to the genome of the species used as proxy for the ancestral state. |
+| \[*ancestral_gff*\] | Compulsory if *ancestral* is set as "outgroup". Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
+| *scaffolds* | Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex / mating type chromosomes). |
 
-for more details run: 
 
-```shell
-./master.sh --help or ./master -h 
-```
-This will list the different option
+# PART BELOW TO BE UPDATED : 
 
-
-You can launch the whole workflow by typing:
-
-```shell
-./master.sh -o 1 2>&1 |tee log
-```
-
-This will perform steps I to IV as follows:
 
 # Details of the worfklow and results
 
@@ -241,24 +271,6 @@ This will perform steps I to IV as follows:
 ## RNAseq alignment - TE masking - Gene prediction - Quality assessment
 
 ### Parameters set in config
-
-|     |     |
-| --- | --- |
-| **option in config** | **description** |
-| *RelatedProt* | Full path to a fasta file containing protein sequences to be used for gene prediction. |
-| \[*RNAseqlist*\] | Compulsory with option *a*. Full path to a .txt file containing the list of RNA-seq data files. |
-| \[*bamlist1*\] | Compulsory with option *b*. Full path to a .txt file containing the list of bam files for *genome1* (alignment of RNA-seq data onto the fasta of *genome 1*). |
-| \[*bamlist2*\] | Compulsory with option *b* and if *genome2* is given. Full path to a .txt file containing the list of bam files for genome2 (alignment of RNA-seq data onto the fasta of *genome 2*). |
-| \[*orthoDBspecies*\] | "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata". Will use a database from **orthoDB** for gene prediction. |
-| *fungus* | "YES" or "NO" (default), whether your species is a fungus. |
-| *TEdatabase* | Full path to a database of TE for your species/genus, used in TE prediction, in fasta format. |
-| *ncbi_species* | Name of the ncbi species, used in TE prediction. ==list available [here](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi)== |
-| \[*gtf1*\] | Compulsory with option *d*. Full path to a .gtf file for an existing gene prediction on *genome1*. |
-| \[*gtf2*\] | Compulsory with option *d* and if *genome2* is given. Full path to a .gtf file for an  existing gene prediction on *genome2*. |
-| *busco_lineage* | Lineage used for **busco** analysis. You can access the list of available lineages by typing `busco --list-dataset`. |
-| *interpro* | YES or NO (default), whether **interproscan** quality check of the genome annotation should be performed. Warning: this can take up to several days for a big dataset. |
-
-Note: If option *d* is set, only *gtf1* and *gtf2* (if you use 2 haplotypes) are needed.
 
 ==Give examples of files for RNAseqlist and bamlist HERE==
 
@@ -354,12 +366,9 @@ will enable to infer gene order for dS interpretation
 |     |     |
 | --- | --- |
 | **option in config** | **description** |
-| *scaffolds* | Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex / mating type chromosomes). |
 | *==ancestral==* | "chromosome" or "outgroup", whether the sequence used as proxy for the ancestral state is one of the sex / mating type chromosomes or an ougroup provided below. |
 | ==\[*ancestral_chromosome_scaffolds*\]== | Compulsory if *ancestral* is set as "chromosome". Full path to the list of scaffolds of the chromosome used as proxy for ancestral state. |
 | \[*==outgroup_orthofinder==*\] | Advised if *ancestral* is set as "chromosome". Full path to a list of genomes to be used as outgroups in OrthoFinder only. |
-| \[*ancestral_genome*\] | Compulsory if *ancestral* is set as "outgroup". Full path to the genome of the species used as proxy for the ancestral state. |
-| \[*ancestral_gff*\] | Compulsory if *ancestral* is set as "outgroup". Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
 | ==\[*ancestral_outgroup_scaffolds*\]== | Compulsory if *ancestral* is set as "outgroup". Full path to the list of focal scaffolds for the outgroup used as proxy for ancestral state. |
 
 ==Give examples of files for scaffolds, ancestral_chromosome_scaffolds, outgroup_orthofinder and ancestral_outgroup_scaffolds ?==
