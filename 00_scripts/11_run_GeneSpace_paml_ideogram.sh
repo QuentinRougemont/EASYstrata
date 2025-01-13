@@ -487,6 +487,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
         fi
     else
         echo -e "no ancestral genome assumed"
+        awk '{print $1"\t"$2"\t"$3}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
         if [ -n "${links}" ] ; then    
             if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
                 02_results/paml/single.copy.orthologs_cleaned \
@@ -930,13 +931,31 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     #run minimap on the genome 
     #assumption : each genome MUST BE located in folder 03-genome
     
-   exit  
     #------------------------ step 8 -- model comparison -------------------------------------------------#
-    mkdir 02_results/modelcomp/
     echo -e "\n\n~~~~~~~~~~~\n\trunning changepoint\n~~~~~~~~~~~~~~~\n"
-    Rscript 00_scripts/Rscripts/06.MCP_model_comp.R || \
-        { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
-
+    if [[ -d 02_results/modelcomp ]]
+    then
+        echo -e "WARNING directory modelcomp already exists! check its content first
+        Do you wish to remove it?\n
+        the data will be lost\n"
+        select yn in "Yes" "No"; do
+            case $yn in
+                Yes ) rm -rf 02_results/modelcomp/ ; if [ -n "$ancestral_genome" ] ; then Rscript 00_scripts/Rscripts/06.MCP_model_comp.R YES else Rscript 00_scripts/Rscripts/06.MCP_model_comp.R NO ; fi  || \
+            { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; } ;
+                break;;
+                No ) exit;;
+            esac
+        done
+    else
+        mkdir 02_results/modelcomp/
+       if [ -n "${ancestral_genome}" ] ; then
+          Rscript 00_scripts/Rscripts/06.MCP_model_comp.R YES || \
+          { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
+       else
+          Rscript 00_scripts/Rscripts/06.MCP_model_comp.R NO || \
+          { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
+       fi
+    fi 
 elif [[ $options = "changepoint" ]]
     then
 
@@ -952,15 +971,21 @@ elif [[ $options = "changepoint" ]]
         the data will be lost\n"
         select yn in "Yes" "No"; do
             case $yn in
-                Yes ) rm -rf; Rscript 00_scripts/Rscripts/06.MCP_model_comp.R || \
+                Yes ) rm -rf 02_results/modelcomp/ ; if [ -n "$ancestral_genome" ] ; then Rscript 00_scripts/Rscripts/06.MCP_model_comp.R YES else Rscript 00_scripts/Rscripts/06.MCP_model_comp.R NO ; fi  || \
             { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; } ;
                 break;;
                 No ) exit;;
             esac
         done
     else
-        Rscript 00_scripts/Rscripts/06.MCP_model_comp.R || \
-           { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
+       if [ -n "${ancestral_genome}" ] ; then
+          Rscript 00_scripts/Rscripts/06.MCP_model_comp.R YES || \
+          { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
+       else
+           Rscript 00_scripts/Rscripts/06.MCP_model_comp.R NO || \
+          { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; }
+       fi
+
     fi
 
 fi 

@@ -5,6 +5,8 @@
 #Author: QR
 #Date: 26-01-24
 ################################################################################
+argv <- commandArgs(T)
+is_anc <- argv[1] #a simple YES/NO to state wether ancestral species is used or not
 
 #--------------- check if library are installed -------------------------------#
 libs <- c('mcp','dplyr','ggplot2','magrittr','cowplot','ggstatsplot' )
@@ -486,6 +488,7 @@ dev.off()
 
 
 #finally: 
+if(is_anc=="YES"){ 
 s3.anc.h1 <- select(df, gene, geneX, three_strata)
 s4.anc.h1 <- select(df, gene, geneX, four_strata)
 s5.anc.h1 <- select(df, gene, geneX, five_strata)
@@ -514,6 +517,19 @@ write.table(s7.anc.h1,paste0(path,"classif.s7.ancestral.haplo1"),
     quote=F,row.names=F,col.names=F,sep="\t")
 write.table(s8.anc.h1,paste0(path,"classif.s8.ancestral.haplo1"),
     quote=F,row.names=F,col.names=F,sep="\t")
+
+}else{
+        #geneY.x ortho   geneY.y
+s3.h1.h2 <- select(df, gene, geneY.y, three_strata)
+s4.h1.h2 <- select(df, gene, geneY.y, four_strata)
+s5.h1.h2 <- select(df, gene, geneY.y, five_strata)
+s6.h1.h2 <- select(df, gene, geneY.y, five_strata)
+s6.h1.h2 <- select(df, gene, geneY.y, six_strata)
+s7.h1.h2 <- select(df, gene, geneY.y, seven_strata)
+s8.h1.h2 <- select(df, gene, geneY.y, eight_strata)
+
+}
+
 write.table(s3.h1.h2,paste0(path,"classif.s3.haplo1.haplo2"),
     quote=F,row.names=F,col.names=F,sep="\t")
 write.table(s4.h1.h2,paste0(path,"classif.s4.haplo1.haplo2"),

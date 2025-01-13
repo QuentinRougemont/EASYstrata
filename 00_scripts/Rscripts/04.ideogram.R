@@ -95,8 +95,11 @@ if (argv[1]=="-h" || length(argv)==0){
     
     
     if (length(argv)==5) {
-    all <- cbind(bed1, bed2) %>% group_by(contig1) %>% 
-        filter(n()>4) %>% group_by(contig2) %>% filter(n()>4) %>%
+    all <- cbind(bed1, bed2) %>% 
+        group_by(contig1) %>% 
+        filter(n()>4) %>% 
+        group_by(contig2) %>% 
+        filter(n()>4) %>%
         mutate(fill = 'cccccc') %>%
         as.data.frame() %>%  mutate(Species_1 = dense_rank(contig1)) %>%
         mutate(Species_2 = dense_rank(contig2)) %>% 
@@ -135,8 +138,9 @@ if (argv[1]=="-h" || length(argv)==0){
     }
     
     #export the joint bed:
-    write.table(all, paste0("joint_", sp1, "_" , sp2, ".bed" ) , sep="\t", row.names =F, col.names=T, quote = F)
+    write.table(all, paste0("02_results/ideogram/joint_", sp1, "_" , sp2, ".bed" ) , sep="\t", row.names =F, col.names=T, quote = F)
     writeLines("joint bed file succesffuly exported\n")
+    writeLines(paste0("number of lines in bed:" ,nrow(all)) )
     #here it would be important to check that the order of the genes in one or the two species is identical
     #to the order of the genes in the sco! 
     

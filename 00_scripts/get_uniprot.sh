@@ -18,7 +18,7 @@ then
     fi
 
 else
-    mkdir uniprot
+    mkdir uniprot 2>/dev/null
     cd uniprot || exit 
 
     echo -e "\n\n------downloading uniprot--------\n"
