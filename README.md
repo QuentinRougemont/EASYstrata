@@ -340,8 +340,8 @@ Warning: TSEBRA parameters *intron_support* and *stasto_support* are set to 0 in
 
 - Final genome annotation reshaping
 
-**For options *a* and *b*:** The final genome annotation  is the output from TSEBRA.  
-**For option *c*:** The final genome annotation is the best protein-based braker round, as evaluated with busco.
+**if RNAseq is used:** The final genome annotation  is the output from TSEBRA.  
+**without RNAseq*:** The final genome annotation is the best protein-based braker round, as evaluated with busco.
 
 Corresponding script: `00_scripts/08_braker_reshaping.sh`  
 The genes will be renamed to insert the scaffold name for clarity in downstream analyses.  
@@ -436,9 +436,12 @@ Align all coding sequences from the focal scaffolds.
 
 ### 6\. dS calculation and plotting
 
-- Calculation of dS (& dN) using **PAML**
-    
-- Plotting dS values using a custom R script
+- Calculation of d~S~ (& dN) using **PAML**
+
+**NOTE ON GENE NAME**
+PAML will fail if special characters occur in the input fasta file, or **if the length of a gene name in the fasta header is above 32 characters.** 
+To prevent this, we implemented an automatic renaming procedure to shorten character names and remove special characters.  
+- Plotting dS values using a custom R script  
     
 
 Corresponding script: `00_scripts/Rscripts/03_plot_paml.R`  

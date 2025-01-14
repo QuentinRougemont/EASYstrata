@@ -67,4 +67,5 @@ dependencies:
   - r-mcp=0.3.4
   - r-tidyverse=2.0.0
   - r-glue=1.8.0
+  - poppler=24.12.0
     #r-data.table=1.16.4
