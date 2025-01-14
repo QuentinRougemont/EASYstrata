@@ -5,12 +5,12 @@
 #Date: 12-05-23
 
 #INPUTs -- 3 arguments needed:  
-# 1 - bed files for the species1
-# 2 - bed files for the species2
-# 3 - a string: "N" or "R" for "Normal" or Reversed (R): 
-#    in the case were the focal region is spread on two scaffold, 
-#    this string should state wether the second scaffold should be reversed or not. 
-#this will not work for more than two scaffold
+# 1 - bed files for the haplotype1
+# 2 - bed files for the haplotype2
+# 3 - a 3 column file containing ancestral proxy information for plotting:
+#     column1: the haplotype name of the proxy to plot along (ancestral proxy or other)
+#     column2: the_chromosome_name to use as proxy (X or ancestral species chromosome id) 
+#     column3: a string about chromosome orientation: "N" or "R" for "Normal" or Reversed (R): 
 
 # optional:
 # 4 - bed file for the ancestral species 
@@ -19,13 +19,19 @@
 
 argv <- commandArgs(T)
 if (argv[1]=="-h" || length(argv)==0){
-    cat("run script as:\n. \tRscript ./03.plot_paml.R haplotype1 haplotype2 chromosome [optional: ancestral_sp]\n\n")
-    cat("input files should be provided in this exact order\n")
+    cat(paste0("\033[0;41m","run script as:\n\tRscript ./03.plot_paml.R haplotype1 haplotype2 chromosome [optional: ancestral_sp]\n\n","\033[0m","\n"))
+    cat(paste0("\033[0;42m","COMPULSORY input files should be provided in this exact order\n","\033[0m"))
     cat("\t* haplotype1 basename\n")
     cat("\t* haplotype2 basename\n")
-    cat("\t* chromosome file \n")
-    cat("optionally:\n")
-    cat("\tR* basename of the ancestral species\n")
+    cat("\t* chromosome: a 3 columns tab separated file containing\n
+        \t\tcolumn1: the haplotype name of the proxy to plot along
+        \t\tcolumn2: the_chromosome_name to use as proxy (X or ancestral species)
+        \t\tcolumn3: a string about chromosome orientation: 'N' or 'R' for 'Normal' or 'Reversed' (R)\n
+        example:
+        Mlag129A1\tMalg129A1_contig8\tN
+        Mlag129A1\tMalg129A1_contig11\tR\n\n")
+    cat(paste0("\033[0;44m","optionally:\n","\033[0m"))
+    cat("\t*ancestral_sp : basename of the ancestral species\n")
 }else{
 
     #--------------- check if library are installed -------------------------------#
@@ -60,8 +66,6 @@ if (argv[1]=="-h" || length(argv)==0){
     # yn00 results:
     dat <- read.table("02_results/paml/results_YN.txt") %>% 
     	set_colnames(., c("Ds","SEDs","Dn","SEDn", "geneX", "geneY"))
-    
-    
     
     if (length(argv)<3) {
     	  stop("At least the name of 2 species to compare and a txt file containing the name and order of scaffold must be supplied.n", call.=FALSE)
@@ -167,20 +171,7 @@ if (argv[1]=="-h" || length(argv)==0){
       geom_errorbar(aes(ymin = Ds-SEDs, ymax = Ds + SEDs), width = .1) +
       facet_wrap(~scaff, scale="free_x") +
       geom_point( size = 1) + 
-      #geom_text(hjust = 0, vjust = 0, size = 5, color="black") +
       theme_classic() +
-      #geom_label_repel(aes(fill = factor(status)), colour = "white", segment.colour = "black",
-      #geom_text_repel(
-      #  force_pull   = 0, # do not pull toward data points
-      #  nudge_y      = 0.06,
-      #  direction    = "x",
-      #  angle        = 90,
-      #  hjust        = 0,
-      #  segment.size = 0.4,
-      #  max.iter = 1e4, max.time = 1) +
-      #color the gene:
-      #  scale_fill_discrete(type = mycolor2[1:3]) +
-    
       scale_y_break(c(1,max(all$Ds, na.rm = T)-0.1)) +
       ylim(c(0,max(all$Ds, na.rm=T)+.1)) +
       xlab("position along chr") +
@@ -200,9 +191,6 @@ if (argv[1]=="-h" || length(argv)==0){
       th_plot + theme(legend.position = "none") +
       scale_color_manual(values=wes_palette(n=2, name="GrandBudapest1")) +
       ggtitle("B") 
-     
-      
-    #Fig1B
     
     #create dir if not present:
     if (!dir.exists("02_results/dsplots")){
@@ -214,9 +202,7 @@ if (argv[1]=="-h" || length(argv)==0){
     
     pdf(file = "02_results/dsplots/Ds.pdf",14,8)
     patch 
-    #plot_grid(Fig1A, Fig1B, labels="AUTO", ncol = 1)
     dev.off()
-    
     
     writeLines("-------------------------------------------------------")
     writeLines("------- constructing graph with gene order-------------\n")
