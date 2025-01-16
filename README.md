@@ -14,14 +14,14 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
    * [Installation](#installation)
    * [Before-launching-the-workflow](#before-launching-the-workflow)
    * [How to use](#how-to-use)
-	   * [option 1: From genome annotation to strata inference](#option-1-from-genome-annotation-to-strata-inference)
-	   * [option 2: Anotation and synteny inference only](#option-2-anotation-and-synteny-inference-only)
-	   * [option 3: Synteny and strata inference from existing data](#option-3-synteny-and-strata-inference-from-existing-data)
-	   * [option 4: Evolutionary strata inference from existing data](#option-4-evolutionary-strata-inference-from-existing-data)
-     	   * [option 5: Only synteny analysis](#option-5-only-synteny-analysis)
-   	   * [option 6: Genome annotation only](#option-6-genome-annotation-only)
-   	   * [option 7: Only evolutionary strata inference](#option-7-only-evolutionary-strata-inference)
-           * [option 8: Synteny plots only](#option-8-synteny-plots-only)  
+        * [option 1: From genome annotation to strata inference](#option-1-from-genome-annotation-to-strata-inference)
+        * [option 2: Anotation and synteny inference only](#option-2-anotation-and-synteny-inference-only)
+        * [option 3: Synteny and strata inference from existing data](#option-3-synteny-and-strata-inference-from-existing-data)
+        * [option 4: Evolutionary strata inference from existing data](#option-4-evolutionary-strata-inference-from-existing-data)
+        * [option 5: Only synteny analysis](#option-5-only-synteny-analysis)
+        * [option 6: Genome annotation only](#option-6-genome-annotation-only)
+        * [option 7: Only evolutionary strata inference](#option-7-only-evolutionary-strata-inference)
+        * [option 8: Synteny plots only](#option-8-synteny-plots-only)  
    * [Input data](#input-data)
    * [Example input data](#example-input-data)
    * [Details of the worfklow and results](#details-of-the-workflow-and-results)
@@ -259,6 +259,7 @@ For an example of input files, we provide an [example data folder](https://githu
 | *scaffolds* | **Compulsory** Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex/mating-type chromosomes). |
 
 
+
 # PART BELOW TO BE UPDATED : 
 
 
@@ -274,21 +275,23 @@ For an example of input files, we provide an [example data folder](https://githu
 
 ### Options
 
-**(*a*) - Align RNA & Annotate:**  
+**Align RNA & Annotate:**  
 Will perform alignment of provided RNA-seq data and use it as additional information for genome annotation.
+rnaseq="YES"   #YES/NO a string stating wether rnaseq data is available or not
+RNAseqlist="/full/path/to/rnaseq.list.txt" #list of rnaseq data 
 
-**(*b*) - Annotate, use BAM of RNA**  
+**Annotate, use BAM of RNA**  
 Will use provided BAM of already aligned RNA-seq data and use it as additional information for genome annotation.
 
-**(*c*) - Annotate, no RNA**  
+**Annotate, no RNA**  
 Will perform genome annotation without using RNA information.
 
-**(*d*) - Skip**  
+**Skip**  
 If you have already annotated your genome, will use provided gtf for the following steps, effectively skipping genome annotation.
 
 ## Operations of step I
 
-### 1\. Alignment of RNA-seq data (only with option *a*)
+### 1\. Alignment of RNA-seq data 
 
 Corresponding script: `00_scripts/launch_rnaseq.sh`
 
