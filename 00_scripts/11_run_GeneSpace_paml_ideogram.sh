@@ -712,6 +712,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     if [ -n "${ancestral_genome}" ] ; then
 
         echo "ancestral genome was provided" 
+        ancestralTE="$ancestralTE" #to be provided in config file #ignored for now
   
         if [ -n "$links" ] ; then
             echo "links file were provided"
@@ -1015,3 +1016,172 @@ if [ -n "${ancestral_genome}" ] ; then
                    "$links" 
    done
 fi
+
+
+## for fun we now make circos plot with links consisting of the strata and colored by their ds Values:
+#preparer des bed file pour faire des circos plots:
+mkdir 02_results/bed 2>/dev/null
+if [ -n "${ancestral_genome}" ] ;
+then
+    cut -f 1-3,20 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.4strata.bed
+    cut -f 1-3,21 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.5strata.bed
+    cut -f 1-3,22 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.6strata.bed
+    cut -f 1-3,23 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.7strata.bed
+    cut -f 1-3,24 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.8strata.bed
+    cut -f 1-3,25 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/ancestralspecies.9strata.bed
+
+    #haplotype1 bed:
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,20 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".4strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,21 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".5strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,22 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".6strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,23 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".7strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,24 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".8strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f7,25 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo1".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo1".9strata.bed
+
+    #haplotype2 bed:
+      join -1 1 -2 4 <(sort -k1,1 <(cut -f12,20 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".4strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f12,21 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".5strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f12,22 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".6strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f12,23 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".7strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f12,24 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".8strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f12,25 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".9strata.bed
+
+    cat 02_results/bed/ancestralspecies.4strata.bed 02_results/bed/"$haplo1".4strata.bed > 02_results/bed/ancestralspecies_"$haplo1".4strata.bed
+    cat 02_results/bed/ancestralspecies.5strata.bed 02_results/bed/"$haplo1".5strata.bed > 02_results/bed/ancestralspecies_"$haplo1".5strata.bed
+    cat 02_results/bed/ancestralspecies.6strata.bed 02_results/bed/"$haplo1".6strata.bed > 02_results/bed/ancestralspecies_"$haplo1".6strata.bed
+    cat 02_results/bed/ancestralspecies.7strata.bed 02_results/bed/"$haplo1".7strata.bed > 02_results/bed/ancestralspecies_"$haplo1".7strata.bed
+    cat 02_results/bed/ancestralspecies.8strata.bed 02_results/bed/"$haplo1".8strata.bed > 02_results/bed/ancestralspecies_"$haplo1".8strata.bed
+    cat 02_results/bed/ancestralspecies.9strata.bed 02_results/bed/"$haplo1".9strata.bed > 02_results/bed/ancestralspecies_"$haplo1".9strata.bed
+
+    cat 02_results/bed/ancestralspecies.4strata.bed 02_results/bed/"$haplo2".4strata.bed > 02_results/bed/ancestralspecies_"$haplo2".4strata.bed
+    cat 02_results/bed/ancestralspecies.5strata.bed 02_results/bed/"$haplo2".5strata.bed > 02_results/bed/ancestralspecies_"$haplo2".5strata.bed
+    cat 02_results/bed/ancestralspecies.6strata.bed 02_results/bed/"$haplo2".6strata.bed > 02_results/bed/ancestralspecies_"$haplo2".6strata.bed
+    cat 02_results/bed/ancestralspecies.7strata.bed 02_results/bed/"$haplo2".7strata.bed > 02_results/bed/ancestralspecies_"$haplo2".7strata.bed
+    cat 02_results/bed/ancestralspecies.8strata.bed 02_results/bed/"$haplo2".8strata.bed > 02_results/bed/ancestralspecies_"$haplo2".8strata.bed
+    cat 02_results/bed/ancestralspecies.9strata.bed 02_results/bed/"$haplo2".9strata.bed > 02_results/bed/ancestralspecies_"$haplo2".9strata.bed
+
+
+else
+    #tester si pas d'ancestral
+    #haplotype1 bed:
+    cut -f1-3,18 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".4strata.bed
+    cut -f1-3,19 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".5strata.bed
+    cut -f1-3,20 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".6strata.bed
+    cut -f1-3,21 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".7strata.bed
+    cut -f1-3,22 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".8strata.bed
+    cut -f1-3,23 02_results/modelcomp/noprior/df.txt |sed 1d > 02_results/bed/"$haplo1".9strata.bed
+   #haplotype2 bed:
+      join -1 1 -2 4 <(sort -k1,1 <(cut -f11,18 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".4strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f11,19 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".5strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f11,20 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".6strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f11,21 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".7strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f11,22 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".8strata.bed
+    join -1 1 -2 4 <(sort -k1,1 <(cut -f11,23 02_results/modelcomp/noprior/df.txt )) \
+        <(sort -k4,4 genespace/bed/"$haplo2".bed )  \
+        |awk '{print $3"\t"$4"\t"$4"\t"$2}'  > 02_results/bed/"$haplo2".9strata.bed
+fi
+
+cat 02_results/bed/"$haplo1".4strata.bed 02_results/bed/"$haplo2".4strata.bed> 02_results/bed/"$haplo1"."$haplo2".4strata.bed
+cat 02_results/bed/"$haplo1".5strata.bed 02_results/bed/"$haplo2".5strata.bed> 02_results/bed/"$haplo1"."$haplo2".5strata.bed
+cat 02_results/bed/"$haplo1".6strata.bed 02_results/bed/"$haplo2".6strata.bed> 02_results/bed/"$haplo1"."$haplo2".6strata.bed
+cat 02_results/bed/"$haplo1".7strata.bed 02_results/bed/"$haplo2".7strata.bed> 02_results/bed/"$haplo1"."$haplo2".7strata.bed
+cat 02_results/bed/"$haplo1".8strata.bed 02_results/bed/"$haplo2".8strata.bed> 02_results/bed/"$haplo1"."$haplo2".8strata.bed
+cat 02_results/bed/"$haplo1".9strata.bed 02_results/bed/"$haplo2".9strata.bed> 02_results/bed/"$haplo1"."$haplo2".9strata.bed
+
+if [ -n "${ancestral_genome}" ] ; then
+    echo ancestral genome provided 
+    for links in 02_results/bed/ancestralspecies$haplo1.*.strata.bed ; do
+        if [ -n "${annotateTE}" ] ; then
+            echo TE bed provided
+            Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
+               -c "$chromosomes" \
+               -y 02_results/synteny_ancestral_sp_"$haplo1".txt \
+               -f ancestral_sp/ancestral_sp.fa.fai \
+               -g haplo1/03_genome/"$haplo1".fa.fai \
+               -i genespace/bed/ancestral_sp.bed  \
+               -j genespace/bed/"$haplo1".bed  \
+               -t "$genome1TE" \
+               -u "$genome2TE" \
+               -l "$links"
+        else 
+            echo assuming noTE
+            Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
+               -c "$chromosomes" \
+               -y 02_results/synteny_ancestral_sp_"$haplo1".txt \
+               -f ancestral_sp/ancestral_sp.fa.fai \
+               -g haplo1/03_genome/"$haplo1".fa.fai \
+               -i genespace/bed/ancestral_sp.bed  \
+               -j genespace/bed/"$haplo1".bed  \
+               -t "$genome1TE" \
+               -u "$genome2TE" \
+               -l "$links"
+        fi
+    done
+else
+    echo no ancestral genome provided 
+fi
+#performing haplo1 vs haplo2 comparisons :
+for links in 02_results/bed/"$haplo1"."$haplo2".*strata.bed ; do
+    if [ -n "${annotateTE}" ] ; then
+        echo TE bed provided
+        Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
+           -c "$chromosomes" \
+           -y 02_results/synteny_"$haplo1"_"$haplo2".txt \
+           -f haplo1/03_genome/"$haplo1".fa.fai\
+           -g haplo2/03_genome/"$haplo2".fa.fai \
+           -i genespace/bed/"$haplo1".bed  \
+           -j genespace/bed/"$haplo2".bed  \
+           -t "$genome1TE" \
+           -u "$genome2TE" \
+           -l "$links"
+    else 
+        echo assuming noTE
+        Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
+           -c "$chromosomes" \
+           -y 02_results/synteny_"$haplo1"_"$haplo2".txt \
+           -f haplo1/03_genome/"$haplo1".fa.fai\
+           -g haplo2/03_genome/"$haplo2".fa.fai \
+           -i genespace/bed/"$haplo1".bed  \
+           -j genespace/bed/"$haplo2".bed  \
+           -l "$links"
+    fi
+done
+
+#now we will do the same discretisation of dS for plotting in ideogram: 
+
+# TO BE DONE
+

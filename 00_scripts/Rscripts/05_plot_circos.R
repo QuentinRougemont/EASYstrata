@@ -59,6 +59,9 @@ option_list <- list(
   make_option(c("-l","--links"), type="character", default=NULL,
               help="bed file of regions to highlight (gene/centromere/etc) [default %default]",
               ),
+  make_option(c("-d","--ds"), type="character", default=NULL,
+              help="path to a ds file computed from previous steps [default %default]",
+  ),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
               help="Print out all parameter settings [default]")
 )
@@ -85,7 +88,7 @@ if(opt$v){
   cat(paste0("\t--TE_species1 (-t): bed file of TE for sp1", opt$TE1,"\n"))
   cat(paste0("\t--TE_species2 (-u): bed for of TE for sp2", opt$TE2,"\n"))
   cat(paste0("\t--links (-u): bed file of links  to highlight", opt$links,"\n"))
-
+  cat(paste0("\t--ds (-d): path to the ds file obtained previously use to color the links", opt$links,"\n"))
 }
 
 #----------- load parameters --------------------------------------------------#
@@ -203,20 +206,25 @@ cat(paste0("number of TE in sex chr: ", nrow(TEdensity),"\n\n"))
 #---------- Optional: Prepare table of genes to highlight ---------------------#
 #Import the gene positions
 if(!(is.null(opt$links))) {
-data_genes <- read.table(opt$links, as.is=T, sep='\t') 
-  colnames(data_genes)=c("chr","start","end","category")
-  #Invert contig orientation if needed
-  for (contig in to_inv)
-  {
+    data_genes <- read.table(opt$links, as.is=T, sep='\t') 
+        colnames(data_genes)=c("chr","start","end","category")
+    baselink <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1",  basename(opt$links))
+    pdffile <- paste0('02_results/circos/circos_',haplo,'_on_',reference,"_",baselink,'.pdf')
+
+    #Invert contig orientation if needed
+    for (contig in to_inv)
+    {
     end=contigs[which(contigs$chr==contig),]$end
     data_genes[which(data_genes$chr==contig),]$start=end-data_genes[which(data_genes$chr==contig),]$start
     data_genes[which(data_genes$chr==contig),]$end=end-data_genes[which(data_genes$chr==contig),]$end
-  }
+    }
 
 #keep target only: 
 data_genes <- data_genes %>% filter(chr %in% contigs$chr)
-print(data_genes)
-nrow(data_genes)
+print(paste0("there is ",  nrow(data_genes), " links"))
+
+} else {
+    pdffile <- paste0('02_results/circos/circos_',haplo,'_on_',reference,'.pdf')
 }
 ####------------------------ LAUNCH CIRCOS ---------------------------------####
 #------------- Define plotting parameters -------------------------------------#
@@ -227,6 +235,10 @@ col_ref <- "grey"
 col_hap <- "grey95"
 contig_color <- c(rep(col_ref,nrow(chr_ref)),rep(col_hap,nrow(chr_hap)))
 
+# Define ticks as megabases
+max_size=ceiling(max(c(index_ref$end/10^6,index_hap$end/10^6)))
+brk <- seq(0,max_size,1)*10^6
+
 list_cont=chr_ref$chr
 rcols=vector(length=nrow(syn))
 for(i in 1:nrow(index_ref)) {
@@ -235,6 +247,110 @@ for(i in 1:nrow(index_ref)) {
   rcols[which(syn$chrom1==c)]=wes_palette("Zissou1", length(list_cont), type = c("continuous"))[i]
 }
 
+if(!(is.null(opt$ds))){
+  writeLines("ds file provided")
+  dsfile <- read.table(opt$ds, h = T) 
+  print("dsfile loaded")
+  if ("geneX" %in%  colnames(dsfile)) {
+    print("subsetting columns")
+    dsfile <- select(dsfile, gene, geneX, Ds)
+  } else {
+    dsfile <- select(dsfile, gene, geneY.x, Ds) %>% 
+        set_colnames(., c("gene","geneX","Ds"))
+  }
+
+  writeLines(paste0("ds file size is :", dim(dsfile)))
+
+  syn_ds <- merge(syn,dsfile, by.x ="Gene1", by.y = "gene") #%>% na.omit()
+  if(nrow(syn_ds) == 0){ 
+    syn_ds <- merge(syn,dsfile, by.x ="Gene1", by.y = "geneX") #%>% na.omit() 
+  }
+
+  syn_ds <- na.omit(syn_ds)
+  
+  print("dsfile successfuly loaded")
+  # Make the database for the genomic links
+  nuc1 <- select(syn_ds, c('chrom1', 'start1','end1'))
+  nuc2 <- select(syn_ds, c('chrom2', 'start2','end2'))
+
+  # Invert contig orientation if needed
+  to_inv <- chromosomes[which(chromosomes$inv == 1),'chr']
+  
+  for (contig in to_inv) {
+    end=contigs[which(contigs$chr==contig),]$end
+    #change the coordinates for the synteny databases
+    nuc1[which(nuc1$chrom1==contig),]$start1=end-nuc1[which(nuc1$chrom1==contig),]$start1
+    nuc1[which(nuc1$chrom1==contig),]$end1=end-nuc1[which(nuc1$chrom1==contig),]$end1
+    nuc2[which(nuc2$chrom2==contig),]$start2=end-nuc2[which(nuc2$chrom2==contig),]$start2
+    nuc2[which(nuc2$chrom2==contig),]$end2=end-nuc2[which(nuc2$chrom2==contig),]$end2
+  }
+
+  #subset everything to match the current data:  
+  chr_ref <- filter(chr_ref, chr %in% unique(syn_ds$chrom1) )
+  chr_hap <- filter(chr_hap, chr %in% unique(syn_ds$chrom2) )
+
+  index_ref <- filter(index_ref, chr %in% unique(syn_ds$chrom1)) %>% 
+    left_join(., 
+              (syn_ds %>% group_by(chrom1) %>% 
+              summarise(end = max(end1))), join_by(chr == chrom1)) %>% 
+    mutate(end = end.y) %>% 
+    select(chr, end, species)
+
+  index_hap <- filter(index_hap, chr %in% unique(syn_ds$chrom2) ) %>%
+    left_join(., 
+              (syn_ds %>% group_by(chrom2) %>% 
+              summarise(end = max(end2))), join_by(chr == chrom2)) %>% 
+    mutate(end = end.y) %>% 
+    select(chr, end, species)
+  
+  contig_color <- c(rep(col_ref,nrow(chr_ref)),rep(col_hap,nrow(chr_hap)))
+  max_size=ceiling(max(c(index_ref$end/10^6,index_hap$end/10^6)))
+  brk <- seq(0,max_size,1)*10^6
+  
+  contigs <- rbind(index_ref, index_hap)
+  
+  m0 <- left_join(contigs, syn_ds %>% 
+              group_by(chrom1)%>% summarise(min = min(start1)),
+            join_by(chr == chrom1)) %>%
+    left_join(., syn_ds %>% 
+                group_by(chrom2) %>% summarise(min = min(start2) ),
+              join_by(chr == chrom2)) %>%
+    mutate(min = coalesce(min.x, min.y)) #%>%
+   
+   m <- select(m0, min, end) %>%
+    as.matrix()
+  
+  nb_contig <- nrow(contigs)
+ 
+  #create colors by quantile of ds: 
+  rcols2 <- vector(length = nrow(syn_ds))
+  
+  writeLines("creating quantiles for coloring link by dS values")
+  
+  syn_ds$quantile <- factor(findInterval(
+    syn_ds$Ds, 
+    quantile(syn_ds$Ds, na.rm = T, prob=c(0.33, 0.5, 0.66, 0.75, 0.9))))
+    # quantile(syn_ds$Ds, na.rm = T, prob=c(0.33, 0.5, 0.66, 0.75, 0.9,0.95))))
+  
+  list_cont <- unique(syn_ds$quantile)
+  for(i in 1:length(list_cont)) {
+    c=list_cont[i]
+    rcols2[which(syn_ds$quantile==c)]=wes_palette("Zissou1", length(list_cont), type = c("continuous"))[i]
+  }
+  #prepare filtered genedensity:
+    if(exists('genedensity')){
+    genedensity <- genedensity %>% 
+        #group_by(chr) %>% #weirdyl remove the matching min....
+        filter(chr == m0$chr & start >= m0$min & end <= m0$end ) 
+    }
+    if(exists('TEdensity')){
+      TEdensity <- TEdensity %>% 
+        #group_by(chr) %>% #weirdyl remove the matching min....
+        filter(chr == m0$chr & start >= m0$min & end <= m0$end ) 
+      }
+}
+
+
 #create dir if not present:
 if (!dir.exists("02_results/circos")){
   dir.create("02_results/circos")
@@ -242,7 +358,7 @@ if (!dir.exists("02_results/circos")){
 
 
 # Output in pdf
-pdf(file = paste0('02_results/circos/circos_',haplo,'_on_',reference,'.pdf'))
+pdf(file = pdffile )
 
 #------------- Initialize circos ----------------------------------------------#
 # Initialization
@@ -301,8 +417,11 @@ if(exists('TEdensity')){
 #rcols=scales::alpha(ifelse(d$chrom_lag=='MC03',"blue","purple"),alpha=1)
 # Color the links according to reference haplotype contigs
 # plot links
-circos.genomicLink(nuc1, nuc2, col=rcols, border=NA)
-
+if(exists("dsfile")){
+  circos.genomicLink(nuc1, nuc2, col=rcols2, border=NA)
+} else {
+  circos.genomicLink(nuc1, nuc2, col=rcols, border=NA)
+}
 #---------- Optional: highlight genes -----------------------------------------#
 if(exists('data_genes')){
   writeLines("\nadding links to highlight some regions of interest\n")
