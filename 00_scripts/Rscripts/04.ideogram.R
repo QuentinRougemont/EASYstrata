@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
+#TO DO: add a parser instead of args
+
 #Purpose:
 #script to run rideogram plot 
 #input required:  
@@ -74,6 +76,8 @@ if (argv[1]=="-h" || length(argv)==0){
         scaforientation <- argv[7] 
         scaforder <- read.table(scaforientation, sep="\t") %>% set_colnames(., c("haplo","chr","order"))
 
+        ds <- argv[8]
+        dsfile <- read.table(ds, h=T) %>% na.omit()
     }
     
     sp1 <- basename(gsub(".bed", "",bedA)) 
@@ -132,6 +136,39 @@ if (argv[1]=="-h" || length(argv)==0){
         quit("no")
     }
 
+    #create a pseudo-link file based on dS values:
+    #dsfile <- read.table("02_results/dS.values.forchangepoint.txt", h = T) %>%
+    #  na.omit()
+    if (exists("dsfile")){
+    print("dsfile loaded")
+    if ("geneX" %in%  colnames(dsfile)) {
+      print("subsetting columns")
+      dsfile <- select(dsfile, gene, geneX, Ds) %>%
+        set_colnames(., c("gene1", "gene2","Ds"))
+      
+    } else {
+      print("testing geneY.x")  
+      dsfile <- select(dsfile, gene, geneY.x, Ds) %>% 
+        set_colnames(., c("gene1", "gene2","Ds"))
+    }
+    #print(head(dsfile))
+    writeLines(paste0("ds file size is :", dim(dsfile)))
+    
+    #create quantile for link:
+    dsfile$quantile <- factor(findInterval(
+      dsfile$Ds, 
+      quantile(dsfile$Ds, na.rm = T, prob=c(0.33, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95))))
+    # quantile(syn_ds$Ds, na.rm = T, prob=c(0.33, 0.5, 0.66, 0.75, 0.9,0.95))))
+    
+    colnames(sco) <- c("gene1","gene2")
+    links <-  merge(dsfile, sco) %>% 
+      select(gene1, gene2, quantile) %>% 
+      set_colnames(.,c("gene1","gene2","status"))
+    }
+    
+    
+    
+    
     #-------------- merging bed1 and bed2 - fill colors - create rank to match RIdeogram weird requirement 
     #---- rename the rank as species
     #---- select wanted columns to match RIdeogram requirements: 
@@ -179,7 +216,11 @@ if (argv[1]=="-h" || length(argv)==0){
         #finally we use matching of gene to have it all together:
         #all$fill[match(links$gene1,all$gene1)] <- links$fill
     }
-    
+
+
+
+
+
     #export the joint bed:
     write.table(all, paste0("02_results/ideogram/joint_", sp1, "_" , sp2, ".bed" ) , sep="\t", row.names =F, col.names=T, quote = F)
     writeLines("joint bed file succesffuly exported\n")
@@ -248,7 +289,16 @@ if (argv[1]=="-h" || length(argv)==0){
     
     convertSVG(paste0('02_results/ideogram/', sp1,sp2,'.svg', sep=''), 
               file = paste0('02_results/ideogram/', sp1,sp2,'.pdf'), device = "pdf")
-    } else {
+    } else if(exists("dsfile")){
+    #assuming links associated with ds: 
+      ideogram(karyotype = karyo, 
+               synteny = all, 
+               output=paste0('02_results/ideogram/', sp1,sp2,'_',baselink, '_dsquantiles.svg'))
+      
+      convertSVG(paste0('02_results/ideogram/', sp1,sp2,'_',baselink, '_dsquantiles.svg', sep=''), 
+                 file = paste0('02_results/ideogram/', sp1,sp2,'_', baselink,'_dsquantiles.pdf'), device = "pdf")
+      
+    } else {  
         #assumming links were provided
     ideogram(karyotype = karyo, 
              synteny = all, 
