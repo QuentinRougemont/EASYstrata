@@ -11,10 +11,32 @@ if (argv[1]=="-h" || length(argv)==0){
     cat(paste0("\033[0;41m","compulsory parameter:","\033[0m","\n")) 
     cat("\ta 'YES' or 'NO' argument stating wether or not an ancestral species was used in previous steps or not\n\n")
     cat("other input includes the dS values ordered along the ancestral proxy (generated from the previous steps)\n")
-    cat("\tthis input is read automatically from file 02_results/dS.values.forchangepoint.txt\n")
+    cat("\tif not provided this input will be read automatically from file 02_results/dS.values.forchangepoint.txt\n")
 } else {
     #take the single exepected argument:
     is_anc <- argv[1] #a simple YES/NO to state wether ancestral species is used or not
+    ds_arg <- argv[2]
+
+    if (exists("is_anc")) {
+        print(paste0("was an ancestral genome used?", is_anc))
+    } else {
+        print("error no argument related to ancestral species provided")
+        quit("no")
+    }
+    #---- load data ---- # 
+    dsfile <- "02_results/dS.values.forchangepoint.txt"
+    if (file.exists(dsfile)){
+        print(paste0("reading ", dsfile)) 
+        df <- read.table(dsfile, h = T) #a table with two columns : Ds and order 
+        df <- na.omit(df)
+    } else if (exists("ds_arg")) {
+        print(paste0("reading ", ds_arg)) 
+        df <- read.table(ds_arg, h = T) 
+    } else {
+        print("error no ds file provided")
+        print("please provide a file of ds")
+        quit("no")
+    } 
 
     #--------------- check if library are installed -------------------------------#
     libs <- c('mcp','dplyr','ggplot2','magrittr','cowplot','ggstatsplot' )
@@ -22,11 +44,7 @@ if (argv[1]=="-h" || length(argv)==0){
     
     #---------------- load libraries ---------------------------------------------#
     invisible(lapply(libs, suppressWarnings(suppressMessages(suppressPackageStartupMessages(library))), character.only = TRUE))
-    
-    #---- load data ---- # 
-    df <- read.table("02_results/dS.values.forchangepoint.txt", h = T) #a table with two columns : Ds and order 
-    df <- na.omit(df)
-    
+        
     #create dir if not present:
     if (!dir.exists("02_results/modelcomp")){
       dir.create("02_results/modelcomp")

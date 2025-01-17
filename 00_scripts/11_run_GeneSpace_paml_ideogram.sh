@@ -1183,5 +1183,24 @@ done
 
 #now we will do the same discretisation of dS for plotting in ideogram: 
 
-# TO BE DONE
+scafforientation="chromosomes_orientation.txt" #to be set in config file!
+ if [  -n "${ancestral_genome}" ] ; then
+        echo -e "ancestral genome was provided for inference" 
+        #we will make an ideogram with it 
+        if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+                -c 02_results/sco \
+                -i genespace/bed/"$haplo1".bed \
+                -j genespace/bed/"$haplo2".bed  \
+                -d 02_results/dS.values.forchangepoint.txt
+                -f haplo1/03_genome/"$haplo1".fa.fai \
+                -g haplo2/03_genome/"$haplo2".fa.fai \
+                -s "$scafforientation" \
+                #-l "$links" 
+        then
+             echo -e "\nERROR: ideograms failed /!\ \n
+             please check logs and input data\n" 
+             exit 1
+       fi
+
+ 
 

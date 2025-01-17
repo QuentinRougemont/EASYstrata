@@ -6,16 +6,19 @@
 #Date: 28-11-23 - 12-11-24
 
 #INPUT: 
-# 1 - Table of scaffolds of interest (i.e. scaffolds belonging to sex chromosomes) for the haplotype and the reference.
-#     2 columns: Scaffold name, Species name
+#     1 - haplotype name1 
+#     2 - haplotype name2
+#     3 - chromosome file: table of scaffolds of interest (i.e. scaffolds belonging to sex chromosomes) for the haplotype and the reference.
+#         2 columns: Scaffold name, Species name
 #     ! Note that the order of scaffolds in the file determines the order in which they are displayed on the plot.
 #     ! Note that a third, optional column can indicate whether the scaffolds have to be reversed (1) on the plot
 #       or not (0).
-# 2 - BED file of genes of interest to be displayed on the plot
-# 3 - Table of synteny data (will be read automatically if previous steps were sucessfull)
-# 4 - .fai index of the two genomes (will be read automatically if previous steps were sucessfull)
-
-####-------------------------- INITIALISATION ------------------------------####
+#     4 - Table of synteny data (will be read automatically if previous steps were sucessfull)
+#     5 - .fai index of the two genomes (will be read automatically if previous steps were sucessfull)
+#   optional:
+#     6 bed file of genes of interest to be displayed on the plot
+#     7 bed file of TE of interest to be displayed on the plot
+#     8 ds file to color links according to the dS values 
 
 #------------- check that libraries are installed and load them ---------------#
 packages <- c('circlize','dplyr','tidyr','wesanderson','magrittr','optparse')
@@ -24,77 +27,89 @@ packages <- c('circlize','dplyr','tidyr','wesanderson','magrittr','optparse')
 install.packages(setdiff(packages, rownames(installed.packages())), repos="https://cloud.r-project.org" )
 invisible(lapply(packages, suppressMessages(suppressWarnings(suppressPackageStartupMessages(library))), character.only = TRUE))
 
+
+####-------------------------- INITIALISATION ------------------------------####
 #------------- read input from the command line -------------------------------#
 option_list <- list(
-  make_option(c("-s","--species1"), type="character", default=NULL,
-              help="species1 name' [default %default]", 
+  make_option(c("-s","--haplotype1"), type="character", default=NULL,
+              help="haplotype1 name' [default %default]", 
               ),
-  make_option(c("-p","--species2"), type="character", default=NULL,
-              help="species2 [default %default]",
+  make_option(c("-p","--haplotype2"), type="character", default=NULL,
+              help="haplotype2 name [default %default]",
               ),
   make_option(c("-c","--chromosome_file"), type="character", default=NULL,
-              help="txt file of target chromosomes, a 2 column file with species id\tchromosome id [default %default]",
+              help="txt file of target chromosomes, a 2 column file with haplotype id\tchromosome id [default %default]",
               ),
   make_option(c("-y","--synteny_table"), type="character", default=NULL,
               help="txt file of synteny table (generated from previous steps) [default %default]",
               dest="synteny_file"),
   make_option(c("-f","--fai_species1"), type="character", default=NULL,
-              help="samtools index file from species1 (generated from previous steps) [default %default]",
+              help="samtools index file from haplotype1 (generated from previous steps) [default %default]",
               dest="fai1"),
-  make_option(c("-g","--fai_species2"), type="character", default=NULL,
-              help="samtools index file from species2 (generated from previous steps) [default %default]",
+  make_option(c("-g","--fai_haplotype2"), type="character", default=NULL,
+              help="samtools index file from haplotype2 (generated from previous steps) [default %default]",
               dest="fai2"),
-  make_option(c("-i","--gene_species1"), type="character", default=NULL,
-              help="bed file of genes for species1 (generated from previous steps) [default %default]",
+  make_option(c("-i","--gene_haplotype1"), type="character", default=NULL,
+              help="OPTIONAL: bed file of genes for haplotype1 (generated from previous steps) [default %default]",
               dest="g1"),
-  make_option(c("-j","--gene_species2"), type="character", default=NULL,
-              help="bed file of genes for species2 (generated from previous steps) [default %default]",
+  make_option(c("-j","--gene_haplotype2"), type="character", default=NULL,
+              help="OPTIONAL: bed file of genes for haplotype2 (generated from previous steps) [default %default]",
               dest="g2"),
-  make_option(c("-t","--TE_species1"), type="character", default=NULL,
-              help="bed file of TE for species1 (generated from previous steps) [default %default]",
+  make_option(c("-t","--TE_haplotype1"), type="character", default=NULL,
+              help="OPTIONAL: bed file of TE for haplotype1 (generated from previous steps) [default %default]",
               dest="TE1"),
-  make_option(c("-u","--TE_species2"), type="character", default=NULL,
-              help="bed file of TE for species2 (generated from previous steps) [default %default]",
+  make_option(c("-u","--TE_haplotype2"), type="character", default=NULL,
+              help="OPTIONAL: bed file of TE for haplotype2 (generated from previous steps) [default %default]",
               dest="TE2"),
   make_option(c("-l","--links"), type="character", default=NULL,
-              help="bed file of regions to highlight (gene/centromere/etc) [default %default]",
+              help="OPTIONAL: bed file of regions to highlight (gene/centromere/etc) [default %default]",
               ),
   make_option(c("-d","--ds"), type="character", default=NULL,
-              help="path to a ds file computed from previous steps [default %default]",
+              help="OPTIONAL: path to a ds file computed from previous steps [default %default]",
   ),
   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
               help="Print out all parameter settings [default]")
 )
 
-options(error=traceback)
+#options(error=traceback)
 
-parser <- OptionParser(usage = "%prog -s species1 -p species2 -c chromosomes -y synteny_table
-                       -f fai_specie1 -g fai_species2 [options]", 
+parser <- OptionParser(usage = "%prog -s haplotype1 -p haplotype2 -c chromosomes -y synteny_table
+                       -f fai_specie1 -g fai_haplotype2 [options]", 
                        option_list = option_list)
 opt = parse_args(parser)
-#opt = parse_args(OptionParser(option_list=option_list))
 
 if(opt$v){
   cat(paste0("script to perform CIRCOS plot\n\n"))
-  cat(paste0("COMPULSORY PARAMETERS :\n\t--species1 (-s): ", opt$species1,"\n"))
-  cat(paste0("\t--species2 (-p): ", opt$species2,"\n"))
+  cat(paste0("\033[0;41m","COMPULSORY PARAMETERS:","\033[0m","\n")) 
+  cat(paste0("\n\t--haplotype1 (-s): ", opt$haplotype1,"\n"))
+  cat(paste0("\t--haplotype2 (-p): ", opt$haplotype2,"\n"))
   cat(paste0("\t--chromosome (-c): ", opt$chromosome_file,"\n"))
   cat(paste0("\t--synteny_table (-y): ", opt$synteny_file,"\n"))
-  cat(paste0("\t--fai_species1: index file sp1 (-f): ", opt$fai1,"\n"))
-  cat(paste0("\t--fai_species2: index file sp2 (-g): ", opt$fai2,"\n"))
-  cat(paste0("optional parameters: \n"))
-  cat(paste0("\t--gene_species1 (-i bed file of gene for sp1): ", opt$g1,"\n"))
-  cat(paste0("\t--gene_species2 (-j bed file of gene for sp2): ", opt$g2,"\n"))
-  cat(paste0("\t--TE_species1 (-t): bed file of TE for sp1", opt$TE1,"\n"))
-  cat(paste0("\t--TE_species2 (-u): bed for of TE for sp2", opt$TE2,"\n"))
+  cat(paste0("\t--fai_haplotype1: index file sp1 (-f): ", opt$fai1,"\n"))
+  cat(paste0("\t--fai_haplotype2: index file sp2 (-g): ", opt$fai2,"\n"))
+  cat(paste0("\033[0;42m","optional parameters:\n","\033[0m"))
+  cat(paste0("\t--gene_haplotype1 (-i bed file of gene for sp1): ", opt$g1,"\n"))
+  cat(paste0("\t--gene_haplotype2 (-j bed file of gene for sp2): ", opt$g2,"\n"))
+  cat(paste0("\t--TE_haplotype1 (-t): bed file of TE for sp1", opt$TE1,"\n"))
+  cat(paste0("\t--TE_haplotype2 (-u): bed for of TE for sp2", opt$TE2,"\n"))
   cat(paste0("\t--links (-u): bed file of links  to highlight", opt$links,"\n"))
-  cat(paste0("\t--ds (-d): path to the ds file obtained previously use to color the links", opt$links,"\n"))
+  cat(paste0("\t--ds (-d): path to the ds file obtained previously use to color the links", opt$links,"\n\n"))
 }
 
-#----------- load parameters --------------------------------------------------#
-reference <- opt$species1
-haplo <- opt$species2 
 
+#----------- load parameters --------------------------------------------------#
+if(!is.null(opt$haplotype1)) {
+    reference <- opt$haplotype1
+} else { 
+    stop("haplotype1 name is a compulsory parameter.\nto see script usage run:
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
+if(!is.null(opt$haplotype2)) {
+    haplo <- opt$haplotype2 
+} else { 
+    stop("haplotype2 is name is a compulsory parameter.\nto see script usage:
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
 writeLines("\n~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 writeLines(paste0("\nreference is ", reference,"\n"))
 writeLines(paste0("haplo is ", haplo, "\n"))
@@ -104,31 +119,50 @@ writeLines("~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 #------------- Import other files ---------------------------------------------#
 # import synteny data
 writeLines("\n~~~~~~ loading data ~~~~~~~\n")
-syn <- read.table(opt$synteny_file, header=T, as.is=T, sep='\t')
+if(!is.null(opt$synteny_file)) {
+    syn <- read.table(opt$synteny_file, header=T, as.is=T, sep='\t')
+} else {
+    stop("synteny table is a compulsory parameter.\nto see script usage:
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
 
 # import contig informations from .fai index
-index_ref <- read.table(opt$fai1, as.is = T, sep = '\t')[,c(1,2)] %>% 
-    set_colnames(., c("chr","end"))
+if(!is.null(opt$fai1)) {
+    index_ref <- read.table(opt$fai1, as.is = T, sep = '\t')[,c(1,2)] %>% 
+        set_colnames(., c("chr","end"))
+} else {
+    stop("index file is a compulsory parameter.\tto see script usage:
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
 
-#to fix:
-index_hap <- read.table(opt$fai2, as.is = T, sep = '\t')[,c(1,2)] %>% 
-    set_colnames(., c("chr","end"))
-writeLines("\n~~~~~~ data loaded ~~~~~~~\n")
+if(!is.null(opt$fai2)) {
+    index_hap <- read.table(opt$fai2, as.is = T, sep = '\t')[,c(1,2)] %>% 
+        set_colnames(., c("chr","end"))
+} else {
+    stop("index file is a compulsory parameter.\nto see script usage:
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
 
 #import chromosme data: 
-chromosomes <- read.table(opt$chromosome_file)
+if(!is.null(opt$chromosome_file)) {
+    chromosomes <- read.table(opt$chromosome_file)
+} else {
+    stop("chromosome file is a compulsory parameter.\tto see script usage: 
+         \t./00_scripts/Rscripts/05_plot_circos.R --help")
+}
 # Check if some contigs have to be inverted
 if(ncol(chromosomes)==2) {
   chromosomes$inv=0
 }
 colnames(chromosomes) <- c("species","chr","inv")
 
+writeLines("\n~~~~~~ data loaded ~~~~~~~\n")
 
 
 ####------------------------ PREPARE CIRCOS DATA ---------------------------####
 #------------- Prepare data sets ----------------------------------------------#
 
-# Get list of focus scaffolds for each species
+# Get list of focus scaffolds for each haplotype
 chr_ref <- chromosomes[which(chromosomes$species == reference),]
 chr_hap <- chromosomes[which(chromosomes$species == haplo),]
 chromosomes <- chromosomes[(chromosomes$species==reference) | (chromosomes$species==haplo),]
