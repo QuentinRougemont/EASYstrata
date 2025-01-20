@@ -21,11 +21,11 @@
 #     8 ds file to color links according to the dS values 
 
 #------------- check that libraries are installed and load them ---------------#
-packages <- c('circlize','dplyr','tidyr','wesanderson','magrittr','optparse')
-
-#install.packages(setdiff(packages, rownames(installed.packages())))
+packages <- c('optparse')
 install.packages(setdiff(packages, rownames(installed.packages())), repos="https://cloud.r-project.org" )
-invisible(lapply(packages, suppressMessages(suppressWarnings(suppressPackageStartupMessages(library))), character.only = TRUE))
+   
+#---------------- load libraries ---------------------------------------------#
+invisible(lapply(packages, suppressWarnings(suppressMessages(suppressPackageStartupMessages(library))), character.only = TRUE))
 
 
 ####-------------------------- INITIALISATION ------------------------------####
@@ -157,6 +157,16 @@ if(ncol(chromosomes)==2) {
 colnames(chromosomes) <- c("species","chr","inv")
 
 writeLines("\n~~~~~~ data loaded ~~~~~~~\n")
+
+
+#if all is good:
+#------------- check that libraries are installed and load them ---------------#
+packages <- c('circlize','dplyr','tidyr','wesanderson','magrittr','optparse')
+#---------------- load libraries ---------------------------------------------#
+
+install.packages(setdiff(packages, rownames(installed.packages())), repos="https://cloud.r-project.org" )
+invisible(lapply(packages, suppressMessages(suppressWarnings(suppressPackageStartupMessages(library))), character.only = TRUE))
+
 
 
 ####------------------------ PREPARE CIRCOS DATA ---------------------------####

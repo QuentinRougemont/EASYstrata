@@ -5,6 +5,9 @@
 #Date: 2023
 #Author: QR
 
+#TO DO: including another option to change orientation of all scaffold in all species ?
+
+
 # -- some colors for warnings in the terminal  --:
 source config/colors
 
@@ -1191,7 +1194,7 @@ scafforientation="chromosomes_orientation.txt" #to be set in config file!
                 -c 02_results/sco \
                 -i genespace/bed/"$haplo1".bed \
                 -j genespace/bed/"$haplo2".bed  \
-                -d 02_results/dS.values.forchangepoint.txt
+                -d 02_results/dS.values.forchangepoint.txt \
                 -f haplo1/03_genome/"$haplo1".fa.fai \
                 -g haplo2/03_genome/"$haplo2".fa.fai \
                 -s "$scafforientation" \

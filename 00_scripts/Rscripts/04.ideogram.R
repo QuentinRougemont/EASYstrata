@@ -61,13 +61,13 @@ opt = parse_args(parser)
 
 if(opt$v){
   cat(paste0("script to perform CIRCOS plot\n\n"))
-  cat(paste0("COMPULSORY PARAMETERS :","\n"))
+  cat(paste0("\033[0;41m","COMPULSORY PARAMETERS:","\033[0m","\n")) 
   cat(paste0("\t--single_copy_orthologs (-c): ", opt$sco,"\n"))
   cat(paste0("\t--fai_haplo1: index file of haplotype1 (-f): ", opt$fai1,"\n"))
   cat(paste0("\t--fai_haplo2: index file of haplotype2 (-g): ", opt$fai2,"\n"))
   cat(paste0("\t--bed_haplo1 (-i bed file of gene for haplo1): ", opt$bed1,"\n"))
   cat(paste0("\t--bed_haplo2 (-j bed file of gene for haplo2): ", opt$bed2,"\n"))
-  cat(paste0("optional parameters: \n"))
+  cat(paste0("\033[0;42m","optional parameters:\n","\033[0m"))
   cat(paste0("\t--scaffold_orientation (-s): bed file of TE for sp1", opt$scaffold_orientation,"\n"))
   cat(paste0("\t--links (-l): bed file of links  to highlight", opt$links,"\n"))
   cat(paste0("\t--ds (-d): path to the ds file obtained previously use to color the links", opt$ds,"\n\n"))
@@ -247,8 +247,8 @@ if ("geneX" %in%  colnames(dsfile)) {
   dsfile <- select(dsfile, gene, geneY.x, Ds) %>% 
     set_colnames(., c("gene1", "gene2","Ds"))
 }
-#print(head(dsfile))
-writeLines(paste0("ds file size is :", dim(dsfile)))
+print(head(dsfile))
+writeLines(paste0("ds file size is :", nrow(dsfile)))
 
 #create quantile for link:
 dsfile$quantile <- factor(findInterval(
@@ -270,8 +270,9 @@ links <-  merge(dsfile, sco) %>%
     
     
     #if (length(argv)==5) {
-if(is.null(opt$links) {
-all <- cbind(bed1, bed2) %>% 
+if(!exists("links")) {
+    print("no color")
+    all <- cbind(bed1, bed2) %>% 
     group_by(contig1) %>% 
     filter(n()>4) %>% 
     group_by(contig2) %>% 
@@ -339,6 +340,7 @@ index2 <- read.table(indexB)  %>%
     mutate(Chr = V1, Start = 0,  End = V2, fill = 969696, species = sp2, size = 12, color = 252525) %>%
     select(-V1, -V2)
 
+writeLines("index created")
 #combine contig1 and contig 2
 karyo <- bind_rows(index1, index2)
 #karyo
@@ -372,24 +374,18 @@ if (!dir.exists("02_results/ideogram")){
 }
 
 
-if (is.null(opt$links)) {
-    if(is.null(opt$ds)) {
+#if (is.null(opt$links)) {
+#    if (!exists("dsfile")) {
+    if (!exists("links")) {
+        writeLines("creating black and white ideogram")
         ideogram(karyotype = karyo, synteny = all, 
             output=paste0('02_results/ideogram/', sp1,sp2,'.svg'))
 
         convertSVG(paste0('02_results/ideogram/', sp1,sp2,'.svg', sep=''), 
             file = paste0('02_results/ideogram/', sp1,sp2,'.pdf'), device = "pdf")
-    }
-} else if(exists("dsfile")){
-#assuming links associated with ds: 
-  ideogram(karyotype = karyo, 
-           synteny = all, 
-           output=paste0('02_results/ideogram/', sp1,sp2,'_',baselink, '_dsquantiles.svg'))
-  
-  convertSVG(paste0('02_results/ideogram/', sp1,sp2,'_',baselink, '_dsquantiles.svg', sep=''), 
-             file = paste0('02_results/ideogram/', sp1,sp2,'_', baselink,'_dsquantiles.pdf'), device = "pdf")
-  
+#    }
 } else if(!is.null(opt$links)) {  
+   writeLines("exporting ideogram with other colors")
     #assumming links were provided
     ideogram(karyotype = karyo, 
          synteny = all, 
@@ -397,5 +393,13 @@ if (is.null(opt$links)) {
 
     convertSVG(paste0('02_results/ideogram/', sp1,sp2,'_',baselink, '.svg', sep=''), 
            file = paste0('02_results/ideogram/', sp1,sp2,'_', baselink,'.pdf'), device = "pdf")
-}
+} else if(exists("dsfile")) {  
+   writeLines("exporting ideogram with quantile colors")
+    #assumming links were provided
+    ideogram(karyotype = karyo, 
+         synteny = all, 
+         output=paste0('02_results/ideogram/', sp1,sp2,'_quantile.svg'))
 
+    convertSVG(paste0('02_results/ideogram/', sp1,sp2,'_quantile.svg', sep=''), 
+           file = paste0('02_results/ideogram/', sp1,sp2,'_quantile.pdf'), device = "pdf")
+}

@@ -263,7 +263,7 @@ grep -Ff busco_check/run_"$busco_lineage"/missing_busco_list.tsv "$table" \
 
 #"
 grep -A1 -Ff all.transcripts2 "$haplo".prot.lin.fasta \
-    sed '/^--/d' > \
+    | sed '/^--/d' > \
     "$haplo".longest_transcript.fa
 
 busco -c8 -o busco_check2 -i "$haplo".longest_transcript.fa -l "$busco_lineage" -m protein -f  || \
