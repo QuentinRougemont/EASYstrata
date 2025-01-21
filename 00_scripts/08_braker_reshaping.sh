@@ -350,7 +350,7 @@ awk 'NR == FNR {count[$3]++; next} count[$3]>0 {print $3"\t"$7"\t"$8"\t"$13"\t"$
 
 grep -Ff longest.to.keep.tmp2 "$gtf2"  > "$gtf3"
 
-grep -Ff <( awk '$3=="transcript" {print $10} ' "$gtf3" |sed 's/.t[1-9]//') <(awk '$3=="gene" ' "gtf" ) \
+grep -Ff <( awk '$3=="transcript" {print $10} ' "$gtf3" |sed 's/.t[1-9]//') <(awk '$3=="gene" ' "$gtf" ) \
     |cat - "$gtf3" |LC_ALL=C sort -k1,1 -k4,4n -k5,5n  > "$gtf4"
 
 echo -e "there is $(wc -l "$gtf4"|awk '{print $1}' ) lines in ""$gtf4"" (final gtf)"

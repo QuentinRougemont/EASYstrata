@@ -117,8 +117,7 @@ if (argv[1]=="-h" || length(argv)==0){
     
     ## ------------- arrange the data as needed ----------------------------------------------- ##
     Ds_table <- merge(dat, single_cp, by.x = "geneX", by.y = "geneX")
-    
-    
+
     #now we must: 
         #1 - reorder according to the scaffold orientation
         #2 - create an incremenantial gene order accordingly:
@@ -139,7 +138,7 @@ if (argv[1]=="-h" || length(argv)==0){
         #plotting along the X:
         writeLines("merging all data\n\n")
         all <- merge(bedSp1, scaf, by.x = "scaff", by.y = "chr") %>%
-            left_join(., Ds_table, by=join_by(geneX == gene) ) %>%
+            left_join(., Ds_table, by=join_by(gene == geneX) ) %>%
             arrange(scaff, start, sort =F) %>%
             group_by(scaff) %>%
             mutate(St = ifelse(order == "N", start, rev(start) )) %>% 
@@ -147,8 +146,8 @@ if (argv[1]=="-h" || length(argv)==0){
             ungroup() %>%
             mutate(orderchp = seq(1:nrow(.)))
     }
-    
-    
+    writeLines(paste0('size of data frame is :' , nrow(all)))
+        
     #Ds values above 0.3 will be considered as pseudo-genes for the changepoint analyses. 
     allgood <- all %>% filter((Ds < 0.20) %>% replace_na(TRUE))
     
@@ -165,6 +164,8 @@ if (argv[1]=="-h" || length(argv)==0){
     
     writeLines("making some plots.....\n")
     all$scaff<- factor(all$scaff, levels = c(sort(unique(all$scaff), decreasing=T)))
+
+    print(summary(all$Ds))
 
     Fig1A <- all  %>%   #we plot the D dataframe to obtain the Ds along the order
       ggplot(., aes(x = St, y = Ds )) +
@@ -197,20 +198,18 @@ if (argv[1]=="-h" || length(argv)==0){
       dir.create("02_results/dsplots")
     }
     
-    
     patch <- Fig1A / Fig1B 
     
     pdf(file = "02_results/dsplots/Ds.pdf",14,8)
-    patch 
+    print(patch)
     dev.off()
     
-    writeLines("-------------------------------------------------------")
-    writeLines("------- constructing graph with gene order-------------\n")
-    writeLines("-------------------------------------------------------")
-    
-    #only if we have an ancestral reference, otherwise it is a bit meaningless
     
     if(length(argv)==4){
+        writeLines("-------------------------------------------------------")
+        writeLines("------- constructing graph with gene order-------------\n")
+        writeLines("-------------------------------------------------------")
+
     	# --- now add the order
     	colnames(bedSp1) <- c("scaffSp1","startSp1","endSp1","geneX") 
     	ordSp1<- merge(all, bedSp1, by.x = "geneX", by.y = "geneX", sort = F) %>%
@@ -265,4 +264,8 @@ if (argv[1]=="-h" || length(argv)==0){
         print(patch)
     	dev.off()
     }
+        writeLines("-------------------------------------------------------")
+        writeLines("--all plots have been exported to 02_results/dsplots--\n")
+        writeLines("-------------------------------------------------------")
+
 }

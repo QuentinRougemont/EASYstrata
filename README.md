@@ -23,9 +23,13 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
         * [option 7: Only evolutionary strata inference](#option-7-only-evolutionary-strata-inference)
         * [option 8: Synteny plots only](#option-8-synteny-plots-only)  
    * [Input data](#input-data)
-   * [Example input data](#example-input-data)
-   * [Details of the worfklow and results](#details-of-the-workflow-and-results)
-   * [Output files](#output-files)
+   * [Details of the worfklow and results](#details-of-the-worfklow-and-results)
+   * [working examples](#working-examples)
+        * [1: RNAseq and ancestral genome](#1-rnaseq-and-ancestral-genome)  
+        * [2: already mapped RNAseq and ancestral genome](#2-already-mapped-RNAseq-and-ancestral-genome) 
+        * [3: no RNAseq nor ancestral genome](#3-no-rnaseq-nor-ancestral-genome) 
+        * [4:  already annotated genome](#4-already-annotated-genome)
+        * [5: other use cases](#5-other-use-case)
 
 
 # Purpose:
@@ -44,7 +48,7 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
 Installation: 
 -------
 
-- [Installation instructions](INSTALL/INSTALL.md)
+- [Installation instructions](:/f3e842a69b234bb3bd8f17b014c5ec80)
 
 
 
@@ -117,8 +121,18 @@ this will:
 *	 Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny. This includes the inference of single copy orthologs by **orthofinder**
 *	 Run **minimap** between genes to infer gene synteny
 *	Run **paml** to estimate synonymous divergence (d<sub>S</sub>) between the sequences/regions of interest
-*	Perform various plots: circos plot, d<sub>S</sub> along the genome, ideogram, etc. (example plots are given below) 
-*	Infer the most likely number of evolutionary strata using a changepoint analysis and produce plots with the results
+*	Perform various plots: 
+	*		 circos plot,
+	*		 d<sub>S</sub> along the genome, 
+	*		 ideogram, 
+	*		 etc. (example plots are given below) 
+*	Infer the most likely number of evolutionary strata using a changepoint analysis and produce plots with the results: 
+	*		 estimates most likely number of strata (model weight)  ,
+	*		 use Bayes-Factors to assess differences among strata ,
+	*		 plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots
+	*		 plot circos colored based on numbers of strata
+	*		 plot ideogram colored based on numbers of strata 
+	*		 plot strata numbers along the genome and along ancestral order
 
 The following options allow you to run only certain parts of the workflow.
 
@@ -187,13 +201,14 @@ This is useful for customizing plots.
 
 Table of options:
 | Option: | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|:----:| ---| --- | --- | --- | --- | --- | --- | --- |
 | TE prediction | X | X |   |   |   | X |   |   |
 | Gene prediction | X | X |   |   |   | X |   |   |
-| Orthology and synteny | X | X | X |   | X |   |   |   |
+| Orthology and synteny (GeneSpace & Minimap2)| X | X | X |   | X |   |   |   |
 | Synteny plots | X |   | X |   |   |   |   | X |
-| d<sub>S</sub> computation | X |   | X | X |   |   |   |   |
+| d<sub>S</sub> computation + plots | X |   | X | X |   |   |   |   |
 | Evolutionary strata inference | X |   | X | X |   |   | X |   |
+| Evolutionary plots | X |   | X | X |   |   | X |X   |
 
 ### Restart at any step 
 
@@ -213,11 +228,14 @@ All input data, including full path to input files, should be provided in the [*
 * **ancestral genome** - optional but highly recommended: The genome assembly of a species used as a proxy for the ancestral state. This will allow to plot d<sub>S</sub> along 'ancestral' gene order, and to infer more accurately single copy orthologs.
 * **ancestral gene prediction** - compulsory with ancestral genome: gene prediction associated with the ancestral genome 
 
-**Warning: names of fasta and contigs/scaffolds/chromosomes**
-We recommend you use short names for each of your genome assemblies and avoid any special characters apart from underscore.
-example: species-1.fasta will not be valid in GeneSpace. => Use **species1.fasta** instead.
-For chromosome/contig/scaffold, we recommend you use standardized IDs including the species name, and avoid any special characters apart from underscore.  
+## Warning: names of fasta and contigs/scaffolds/chromosomes**
+We recommend you use short names for your genome assemblies and avoid any special characters apart from underscore.
+*example:* species-1.fasta will not be valid in GeneSpace. => Use **species1.fasta** instead.
+
+For chromosome/contig/scaffold, you  **MUST** use standardized IDs including the species name, and avoid any special characters apart from underscore.  
 example: **species1_chr1** or **species1_contigX** or **species1_scaffoldZ**
+**otherwise the code will failed during renaming steps**
+
 
 ### Input for TE prediction (options 1,2,6 if your input genomes are not already softmasked)
 * **TE database** - compulsory: the name of the TE database (some are available online depending on your taxon) 
@@ -236,8 +254,8 @@ For an example of input files, we provide an [example data folder](https://githu
 
 | option in config | description |
 | --- | --- |
-| *genome1* | **Compulsory:** Full path to the input assembly, either a genome containing both sex/mating-type chromosomes, or a haplotype containing one of the sex/mating-type chromosomes. |
-| *haplotype1* | **Compulsory:** Name of the genome1 to be used as a /contig/scaffold/chromosome basename. |
+| *genome1* | **Compulsory:** Full path to the input assembly, either a genome containing both sex/mating-type chromosomes, or a haplotype containing one of the sex/mating-type chromosomes. (ex: /path/to/genome1.hap1.fa.gz) |
+| *haplotype1* | **Compulsory:** Name of the genome1 to be used as a /contig/scaffold/chromosome basename. (ex: genome1.hap1) |
 | \[*genome2*\] | **Optional:** In the case where a haplotype containing one of the sex/mating-type chromosomes was provided as '*genome1*'. Full path to the input assembly of the haplotype containing the second sex/mating-type chromosome. |
 | \[*haplotype2*\] | **Compulsory if genome2 was provided** Name of the second haplotype. This can be a basename of all chromosomes if a second assembly is avaiable, or the name of the scaffold/contig/chromosomes corresponding to the sex/MAT chromosome (e.g. species_chrY). |
 | annotate | **Compulsory:** a string "YES"/"NO" stating wether gene prediction should be performed or not. |
@@ -248,13 +266,13 @@ For an example of input files, we provide an [example data folder](https://githu
 | \[*orthoDBspecies*\] | **Compulsory for gene prediction:** One of: "Metazoa" "Vertebrata" "Viridiplantae" "Arthropoda" "Eukaryota" "Fungi" "Alveolata". Will use a database from **orthoDB** for gene prediction. |
 | *fungus* | "YES" or "NO" (default), whether your species is a fungus. |
 | annotateTE | **Compulsory:** a string "YES"/"NO" stating wether TE prediction should be performed or not|
-| *TEdatabase* | **Compulsory for TE prediction:** Full path to a database of TE for your species/genus, in fasta format. |
+| *TEdatabase* | **Compulsory for TE prediction:** Full path to a database of TE for your species/genus, in fasta format. (set to NO if you already have a softmasked genome and TE bed files) |
 | *ncbi_species* | **Compulsory for TE prediction:** Name of the ncbi species, list available [here](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi) |
 | \[*gtf1*\] | **Optional**. Full path to a .gtf file for an existing gene prediction on *genome1*. |
 | \[*gtf2*\] | **Optional** Full path to a .gtf file for an  existing gene prediction on *genome2*. |
 | *busco_lineage* | **Compulsory for gene prediction:** Lineage used for **busco** analysis. You can access the list of available lineages by typing `busco --list-dataset`. |
-| *interpro* | "YES" or "NO" (default), whether **interproscan** quality check of the genome annotation should be performed, additionally to the busco quality check. Warning: this can take up to several days for a big dataset. |
-| \[*ancestral_genome*\] | **Optional:** Full path to the genome of the species used as proxy for the ancestral state. |
+| *interpro* | **Optional:** "YES" or "NO" (default), whether **interproscan** quality check of the genome annotation should be performed, additionally to the busco quality check. Warning: this can take up to several days for a big dataset. |
+| \[*ancestral_genome*\] | **Optional (but recommended):** Full path to the genome of the species used as proxy for the ancestral state. |
 | \[*ancestral_gff*\] | **Compulsory if '*ancestral_genome*' is given** Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
 | *scaffolds* | **Compulsory** Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex/mating-type chromosomes). |
 
@@ -269,25 +287,41 @@ For an example of input files, we provide an [example data folder](https://githu
 
 ## RNAseq alignment - TE masking - Gene prediction - Quality assessment
 
-### Parameters set in config
+### Parameters set in config file
 
-==Give examples of files for RNAseqlist and bamlist HERE==
+**Align RNA & Annotate:**
+set: **annotate=YES**
 
-### Options
+set: **rnaseq="YES"**   #YES/NO a string stating wether rnaseq data is available or not
 
-**Align RNA & Annotate:**  
-Will perform alignment of provided RNA-seq data and use it as additional information for genome annotation.
-rnaseq="YES"   #YES/NO a string stating wether rnaseq data is available or not
-RNAseqlist="/full/path/to/rnaseq.list.txt" #list of rnaseq data 
+set: **RNAseqlist="/full/path/to/rnaseq.list.txt"**  
+
+This will perform alignment of provided RNA-seq data and use it for BRAKER.
 
 **Annotate, use BAM of RNA**  
-Will use provided BAM of already aligned RNA-seq data and use it as additional information for genome annotation.
+
+set: **annotate=YES**
+
+set: **rnaseq="YES"** 
+
+set: **bamlist1="/full/path/to/bam.aligned_on_genome1.txt"**
+where  *bam.aligned_on_genome1.txt* is a file txt listing all your bam (full path)
+set **bamlist2="/full/path/to/bam.aligned_on_genome2.txt"**
+	with bam aligned on haplotype2
+
+This will use provided BAM of aligned RNA-seq and use it for BRAKER.
 
 **Annotate, no RNA**  
-Will perform genome annotation without using RNA information.
+set **rnaseq="NO"** 
+This will perform genome annotation without using RNA information.
 
-**Skip**  
-If you have already annotated your genome, will use provided gtf for the following steps, effectively skipping genome annotation.
+**Skip**
+set: **annotate=NO**  
+set: **gtf1="/full/path/to/haplotype1.gtf"**  
+set: **gtf2="/full/path/to/haplotype2.gtf"**  
+
+If you have already annotated your genome, will use provided gtf for the following steps, skipping genome annotation.
+set: 
 
 ## Operations of step I
 
@@ -600,7 +634,6 @@ automatically generated for each changepoint values:
 
 
 
-
 # Options to run part of the workflow
 
 If you wish to perform only part of the workflow or relaunch it from a given step, use option *\-o*
@@ -616,6 +649,31 @@ now if you have a gtf and and genome assembly (either from running this pipeline
 
 
 
+
+
+# --------------------------------------------------------------------------
+
+# working examples 
+##  1: RNAseq and ancestral genome 
+
+- [see exemple 1](example_data/example1.md)
+
+## 2: already mapped RNAseq and ancestral genome 
+
+- [see exemple 2](example_data/example2.md)
+
+## 3: no RNAseq nor ancestral genome 
+
+- [see exemple 3](example_data/example3.md)
+
+## 4: already annotated genome  
+
+- [see exemple 4](example_data/example4.md)
+
+## 5: other use cases 
+
+describe here all possibles combinations 
+
 # --------------------------------------------------------------------------
 
 # list of operations and tools
@@ -628,23 +686,12 @@ now if you have a gtf and and genome assembly (either from running this pipeline
 | __sorting read__                 |  samtools                      | RNAseq        |
 | __mapping quality assement__     |  samtools + R                  | RNAseq        |
 | __TE detection and softmasking__ |  RepeatModeler + RepeadMasker  | genome assembly |
-| __genome annotation__            |  Braker + tsebra               | genome assembly + protein + database |
-| __quality assessment__           |  Busco + Blast + Inter Pro     | genome prediction |
+| __genome annotation__            |  BRAKER + tsebra               | genome assembly + protein + database |
+| __quality assessment__           |  BUSCO + Blast + Inter Pro     | genome prediction |
 | __Synteny and HOG__              |  GeneSpace (including OrthoFinder/MCScan) | gene prediction and proteins |
 | __cds alignement__               |  muscle + translatorX          | gene prediction (single copy orthologs) | 
 | __Ds computation__               |  paml                          | CDS alignment |
 | __Ds plot/CIRCOS plot__          |  R                             | Ds and genome information |
-| __whole genome alignemnt__       |  minimap2                      | genome assemblies |
+| __whole genome alignement__       |  minimap2                      | genome assemblies |
 | __gene microsynteny__            |  R                      | single copy orthologs |
 | __changepoint analysis__         |  R                      | Ds values and gene order |
-
-
-
-This code has been tested with linux. 
-
-
-Normally, you should only run the script ```./master.sh```
-
-below we provided a description of what will be done at each steps.
-
-

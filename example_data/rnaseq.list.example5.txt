@@ -1,0 +1,7 @@
+/path/to/EASYstrata/example_data/example5data/Sl_1_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_1_R2.paired.fastq.gz
+/path/to/EASYstrata/example_data/example5data/Sl_2_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_2_R2.paired.fastq.gz
+/path/to/EASYstrata/example_data/example5data/Sl_4_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_4_R2.paired.fastq.gz
+/path/to/EASYstrata/example_data/example5data/Sl_5_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_5_R2.paired.fastq.gz
+/path/to/EASYstrata/example_data/example5data/Sl_8_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_8_R2.paired.fastq.gz
+/path/to/EASYstrata/example_data/example5data/Sl_9_R1.paired.fastq.gz      /path/to/EASYstrata/example_data/example5data/Sl_9_R2.paired.fastq.gz
+

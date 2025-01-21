@@ -47,8 +47,10 @@ if [[ $ncol = 2 ]] ; then
 
     if [ $? -eq 0 ]; then
         echo "trimmomatic complete "
-        echo -e "\ncounting the number of retained reads\n"        #rm file1file2.tmp 
-        ./00_scripts/utility_scripts/count_read_fastq.sh 02_trimmed/*gz > read_count.txt
+        if [ ! -e read_count.txt ] ; then
+            echo -e "\ncounting the number of retained reads\n" 
+           ./00_scripts/utility_scripts/count_read_fastq.sh 02_trimmed/*gz > read_count.txt
+        fi
 
     else
         echo -e "\n${RED}#ERROR : Runnning trimmomatic failed. please check your input files${NC}"
@@ -71,7 +73,10 @@ else
     
     if [ $? -eq 0 ]; then
         echo trimmomatic complete
-        #rm file1file2.tmp 
+        if [ ! -e read_count.txt ] ; then
+            echo -e "\ncounting the number of retained reads\n" 
+           ./00_scripts/utility_scripts/count_read_fastq.sh 02_trimmed/*gz > read_count.txt
+        fi
     else
         echo -e "\n${RED} ERROR : Runnning trimmomatic failed. please check your input files ${NC}"
         exit 1

@@ -5,8 +5,9 @@
 #Date: 2023
 #Author: QR
 
-#TO DO: including another option to change orientation of all scaffold in all species ?
-
+#TO DO: including another option to change orientation of all scaffold in all species (in ideogram and circos)?
+#TO DO: change the use of single_copy_orthologs in ideogram
+#TO DO: simplifiy the multiple call to ideogram
 
 # -- some colors for warnings in the terminal  --:
 source config/colors
@@ -440,22 +441,26 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
         awk '{print $1"\t"$3"\t"$4}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
         if [  -n "${links}" ] ; then    
         #links were provided and will be colored
-            if ! Rscript ./00_scripts/Rscripts/04.ideogram.R 02_results/sco \
-                genespace/bed/"$haplo1".bed \
-                genespace/bed/"$haplo2".bed  \
-                haplo1/03_genome/"$haplo1".fa.fai \
-                haplo2/03_genome/"$haplo2".fa.fai "$links"
+            if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+                -c 02_results/sco \
+                -i genespace/bed/"$haplo1".bed \
+                -j genespace/bed/"$haplo2".bed  \
+                -f haplo1/03_genome/"$haplo1".fa.fai \
+                -g haplo2/03_genome/"$haplo2".fa.fai \
+                -l "$links"
             then
                   echo -e "\nERROR: ideograms failed /!\ \n
                   please check logs and input data\n" 
                   exit 1
              fi
 
-            if ! Rscript ./00_scripts/Rscripts/04.ideogram.R 02_results/sco_anc \
-                genespace/bed/ancestral_sp.bed \
-                genespace/bed/"$haplo1".bed  \
-                "${ancestral_genome}".fai \
-                haplo1/03_genome/"$haplo1".fa.fai "$links" 
+            if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+                -c 02_results/sco_anc \
+                -i genespace/bed/ancestral_sp.bed \
+                -j genespace/bed/"$haplo1".bed  \
+                -f "${ancestral_genome}".fai \
+                -g haplo1/03_genome/"$haplo1".fa.fai \
+                -l "$links" 
             then
                   echo -e "\nERROR: ideograms failed /!\ \n
                   please check logs and input data\n" 
@@ -464,22 +469,24 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
 
         else
         #no links were provided
-        if ! Rscript ./00_scripts/Rscripts/04.ideogram.R 02_results/sco  \
-            genespace/bed/"$haplo1".bed  \
-            genespace/bed/"$haplo2".bed  \
-            haplo1/03_genome/"$haplo1".fa.fai \
-            haplo2/03_genome/"$haplo2".fa.fai 
+        if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+            -c 02_results/sco  \
+            -i genespace/bed/"$haplo1".bed  \
+            -j genespace/bed/"$haplo2".bed  \
+            -f haplo1/03_genome/"$haplo1".fa.fai \
+            -g haplo2/03_genome/"$haplo2".fa.fai 
         then
               echo -e "\nERROR: ideograms failed /!\ \n
               please check logs and input data\n" 
               exit 1
         fi
 
-        if ! Rscript ./00_scripts/Rscripts/04.ideogram.R 02_results/sco_anc \
-            genespace/bed/ancestral_sp.bed  \
-            genespace/bed/"$haplo1".bed \
-            "${ancestral_genome}".fai \
-            haplo1/03_genome/"$haplo1".fa.fai 
+        if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+            -c 02_results/sco_anc \
+            -i genespace/bed/ancestral_sp.bed  \
+            -j genespace/bed/"$haplo1".bed \
+            -f "${ancestral_genome}".fai \
+            -g haplo1/03_genome/"$haplo1".fa.fai 
         then
               echo -e "\nERROR: ideograms failed /!\ \n
               please check logs and input data\n" 
@@ -493,11 +500,12 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
         awk '{print $1"\t"$2"\t"$3}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
         if [ -n "${links}" ] ; then    
             if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
-                02_results/paml/single.copy.orthologs_cleaned \
-                genespace/bed/"$haplo1".bed \
-                genespace/bed/"$haplo2".bed \
-                haplo1/03_genome/"$haplo1".fa.fai \
-                haplo2/03_genome/"$haplo2".fa.fai "$links" 
+                -c 02_results/paml/single.copy.orthologs_cleaned \
+                -i genespace/bed/"$haplo1".bed \
+                -j genespace/bed/"$haplo2".bed \
+                -f haplo1/03_genome/"$haplo1".fa.fai \
+                -g haplo2/03_genome/"$haplo2".fa.fai \
+                -l "$links" 
             then
                   echo -e "\nERROR: ideograms failed /!\ \n
                   please check logs and input data\n" 
@@ -506,11 +514,11 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
 
         else
             if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
-                02_results/paml/single.copy.orthologs_cleaned \
-                genespace/bed/"$haplo1".bed \
-                genespace/bed/"$haplo2".bed \
-                haplo1/03_genome/"$haplo1".fa.fai \
-                haplo2/03_genome/"$haplo2".fa.fai 
+                -c 02_results/paml/single.copy.orthologs_cleaned \
+                -i genespace/bed/"$haplo1".bed \
+                -j genespace/bed/"$haplo2".bed \
+                -f haplo1/03_genome/"$haplo1".fa.fai \
+                -h haplo2/03_genome/"$haplo2".fa.fai 
             then
                   echo -e "\nERROR: ideograms failed /!\ \n
                   please check logs and input data\n" 
@@ -998,25 +1006,27 @@ fi
 
 for links in 02_results/modelcomp/noprior/classif.s*haplo1.haplo2 ; 
 do 
+
      Rscript ./00_scripts/Rscripts/04.ideogram.R \
-                02_results/sco \
-                genespace/bed/"$haplo1".bed \
-                genespace/bed/"$haplo2".bed \
-                haplo1/03_genome/"$haplo1".fa.fai \
-                haplo2/03_genome/"$haplo2".fa.fai \
-                "$links" 
+                -c 02_results/sco \
+                -i genespace/bed/"$haplo1".bed \
+                -j genespace/bed/"$haplo2".bed \
+                -f haplo1/03_genome/"$haplo1".fa.fai \
+                -g haplo2/03_genome/"$haplo2".fa.fai \
+                -l "$links" 
 done
 
 if [ -n "${ancestral_genome}" ] ; then
    for links in 02_results/modelcomp/noprior/classif.s*ancestral.haplo1 ; 
    do 
-        Rscript ./00_scripts/Rscripts/04.ideogram.R \
-                   02_results/sco_anc \
-                   genespace/bed/ancestral_sp.bed \
-                   genespace/bed/"$haplo1".bed  \
-                   "${ancestral_genome}".fai \
-                   haplo1/03_genome/"$haplo1".fa.fai \
-                   "$links" 
+      Rscript ./00_scripts/Rscripts/04.ideogram.R \
+                -c 02_results/sco_anc \
+                -i genespace/bed/ancestral_sp.bed \
+                -j genespace/bed/"$haplo1".bed  \
+                -f "$ancestral_genome".fai \
+                -g haplo1/03_genome/"$haplo1".fa.fai \
+                -l "$links" 
+                #s "$scafforientation" 
    done
 fi
 
@@ -1187,16 +1197,16 @@ done
 #now we will do the same discretisation of dS for plotting in ideogram: 
 
 scafforientation="chromosomes_orientation.txt" #to be set in config file!
- if [  -n "${ancestral_genome}" ] ; then
+if [  -n "${ancestral_genome}" ] ; then
         echo -e "ancestral genome was provided for inference" 
         #we will make an ideogram with it 
         if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
-                -c 02_results/sco \
-                -i genespace/bed/"$haplo1".bed \
-                -j genespace/bed/"$haplo2".bed  \
+                -c 02_results/sco_anc \
+                -i genespace/bed/ancestral_sp.bed \
+                -j genespace/bed/"$haplo1".bed  \
                 -d 02_results/dS.values.forchangepoint.txt \
-                -f haplo1/03_genome/"$haplo1".fa.fai \
-                -g haplo2/03_genome/"$haplo2".fa.fai \
+                -f "$ancestral_genome".fai \
+                -g haplo1/03_genome/"$haplo1".fa.fai \
                 -s "$scafforientation" \
                 #-l "$links" 
         then
@@ -1204,6 +1214,20 @@ scafforientation="chromosomes_orientation.txt" #to be set in config file!
              please check logs and input data\n" 
              exit 1
        fi
-
+fi
  
+if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
+        -c 02_results/sco \
+        -i genespace/bed/"$haplo1".bed \
+        -j genespace/bed/"$haplo2".bed  \
+        -d 02_results/dS.values.forchangepoint.txt \
+        -f haplo1/03_genome/"$haplo1".fa.fai \
+        -g haplo2/03_genome/"$haplo2".fa.fai \
+        -s "$scafforientation" \
+        #-l "$links" 
+then
+     echo -e "\nERROR: ideograms failed /!\ \n
+     please check logs and input data\n" 
+     exit 1
+fi
 

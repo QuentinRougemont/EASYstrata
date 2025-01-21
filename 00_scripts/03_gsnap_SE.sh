@@ -71,7 +71,20 @@ then
     
     rm $DATAOUTPUT/"$base".concordant*
     rm $DATAOUTPUT/"$base".nomapping*
-else 
+
+    #counting the number of mapped reads :
+    cd "$DATAOUTPUT" || exit
+        
+    samtools view -c "$base".sorted.bam |awk -v var="$base" 'END {print var"\t"$1}' > comptage_brute."${base}".txt
+    samtools view -F -F 0x904 -c "$base".sorted.bam |\
+                awk -v var="$base" 'END {print var"\t"$1}' > comptage_F9004."${base}".txt ;
+    
+    samtools depth "$base".sorted.bam |gzip > "$base".dp.gz  
+    
+    #plot depth along the genome:
+    Rscript ../../00_scripts/Rscripts/plot_dp.R "$base".dp.gz
+    
+    else 
     echo "BAM file already present" 
     echo "please check the data" 
 fi   

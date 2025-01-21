@@ -42,6 +42,8 @@ ncbi_species=""
 #if annotateTE="NO" you may want to provide bed formatted TE elements to display on circos plots:
 #TEgenome1=""
 #TEgenome2=""
+#TEancestral=""
+
 
 #BUSCO SPECIFIC ARGUMENTS:
 #busco_lineage name:
