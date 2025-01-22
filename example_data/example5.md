@@ -51,7 +51,7 @@ download with:
 | *interpro* | ="NO" |
 | *scaffolds* | ="//path/to/EASYstrata/example_data/scaffold_example5.txt" |
 
-click [here](/example5.config) to see the example
+click [here](example_data/example5.config) to see the example
 
 
 3 - launching the workflow : 

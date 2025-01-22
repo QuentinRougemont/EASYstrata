@@ -340,9 +340,13 @@ Corresponding scripts: `00_scripts/03_gsnap_PE.sh` for PE ; `00_scripts/03_gsnap
 
 - Mapping quality assessment
 
-Sequencing depth and MAPQ along the genome will be computed and plotted. The resulting plots can be found in ==XXX/Depth/== and ==XXX/mapq/== .
+Sequencing depth and MAPQ along the genome will be computed and plotted. 
 
-==Insert example plot here==
+The resulting depth by position, mean depth and plots can be found in : `haplo1/04_mapped/Depth/` and `haplo2/04_mapped/Depth`.
+
+![depth.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/depth.png)
+
+
 
 ### 2\. TE discovery and masking
 
@@ -613,7 +617,7 @@ dS colored by strata along the ancestral gene order:
 
 ![Fig8.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig8.png)
 
-**Figure 9:** dS values plotted along the ancestral gene order for all possible models from three to eight changepoints  
+**Figure 8:** dS values plotted along the ancestral gene order for all possible models from three to eight changepoints  
 each point is a gene dS value colored according to the strata of assignation. 
 
 dS colored by strata along the ancestral genome:
@@ -621,7 +625,7 @@ dS colored by strata along the ancestral genome:
 automatically generated for each changepoint values: 
 ![Fig9.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig9.png)
 
-**Figure 8:** dS values plotted along the ancestral genome for all possible models from three to eight changepoints  
+**Figure 9:** dS values plotted along the ancestral genome for all possible models from three to eight changepoints  
 each point is a gene dS value colored according to the strata of assignation
 
 a posterior colored ideogram: 

@@ -4,22 +4,36 @@
 ## 1 download example data genome
 
 data needed:
- - genome assembly for haplotype1 containing X/Y or two MAT (fasta)
- - database of known TE elements 
- - txt file with the name of the sex chromosome/MAT and their orientation
- - optionally: database of known genes in closely related species
+ - genome assembly for haplotype1 containing X/Y or two MAT ( *fakegenome.fa.gz* in fasta format in the example folder)
+ - database of known TE elements (*TE.fa.gz* in the example folder) 
+ - txt file with the name of the sex chromosome/MAT and their orientation (*scaffold_example3.txt* in the example folder)
+ - optionally: database of known genes in closely related species (*relatedprot.fa.gz* in the example folder)
 
+### prepare the data 
 
-assemblies and annotation are all deposited on zenodo and available here: 
+```
+cd example_data
+#assemblies and annotation are all deposited on zenodo and available through wget:
+wget https://zenodo.org/records/14716941/files/data.tar.gz?download=1
+tar zxf data.tar.gz\?download\=1
+mv data/* .
+```
 
-to download: 
+in this example we will work with the "fakegenome.fa.gz" it contains two MAT the A1 and A2 with following contig ID:
+fakegenome_A1
+fakegenome_A2 
 
-`wget /path/to/zenodo/....tar.gz` #(to be updated later)
+the basename being fakegenome and matching the basename assembly, as expected.
 
-extract the data in the example_data folder
+scaffold are provided in the example_folder (named **scaffold_example3.txt**):  
+
+fakegenome     fakegenome_A1  N
+
 
 
 ## 2 - setting your config file
+
+based on the previous data it is very easy to set up the config file:
 
 | option in config | description |
 | --- | --- |
@@ -45,7 +59,7 @@ extract the data in the example_data folder
 | *TEancestral* | ="" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold_example3.txt" |
 
-click [here](/example2.config) to see the full config file example 
+click [here](example_data/example3.config) to see the full config file example 
 
 ## 3 - creating some files: 
 

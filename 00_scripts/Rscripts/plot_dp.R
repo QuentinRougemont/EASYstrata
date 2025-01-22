@@ -39,6 +39,7 @@ write.table(m, paste0('mean_dp',input2,'.txt'), quote = F, row.names = F)
 #filter(m, dp > 10) %>% summarise( meanDP = mean(dp), medianDP = median(dp))
 
 p <- a %>%
+  filter(V3 <= quantile(a$V3,0.99) %>%
   ggplot(.) +
   geom_line(aes(x=V2,y=V3)) +
   facet_wrap_paginate(~ V1, ncol = 1, nrow = 8, scales = 'free') +

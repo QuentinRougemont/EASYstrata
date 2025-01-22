@@ -9,21 +9,36 @@ Example taken from fungi as they are small
 ## 1 download example data genome
 
 data needed:
- - genome assembly for haplotype1 (fasta)
- - genome assembly for haplotype2 (fasta)
- - ancestral genome assembly (fasta - proxy for the gene order)
- - ancestral genome annotation (gft file)
- - RNAseq data (single end or paired-end)
- - database of known TE elements 
+ - genome assembly for haplotype1 (fasta: *genome1.hap1.fa.gz* in example data folder)
+ - genome assembly for haplotype2 (fasta: *genome2.hap2.fa.gz* in example data folder)
+ - genome annotation for haplotype1 (fasta: *genome1.hap1.gtf* in example data folder)
+ - genome annotation for haplotype2 (fasta: *genome2.hap2.gtf* in example data folder)
+ - ancestral genome assembly (fasta - proxy for the gene order: *Mlag129A1.fa.gz* in example data folder)
+ - ancestral genome annotation (gff file: *Mlag129A1.gff.gz* )
  - txt file with the name of the ancestral sex chromosome and their orientation
- - optionally: database of known genes in closely related species
 
 
-assemblies and annotation are all deposited on zenodo and available here: 
+### donwload the data 
 
-to download: 
+```
+cd example_data
+#assemblies and annotation are all deposited on zenodo and available through wget:
+wget https://zenodo.org/records/14716941/files/data.tar.gz?download=1
+tar zxf data.tar.gz\?download\=1
+mv data/* .
+```
 
-`wget /path/to/zenodo/....tar.gz` #(to be updated later)
+this should contain all the necessary data mentionned earlier 
+
+genome1hap1 is the name of haplotype1
+
+genome2hap2 is the name of thaplotype2
+
+ancestral scaffold are provided directly in github example folder and consist in the following tab separated file (named **scaffold.txt**):  
+
+Mlag129A1       Mlag129A1_contig_8      R
+Mlag129A1       Mlag129A1_contig_11     N
+
 
 ## 2 - setting your config file
 
@@ -46,7 +61,7 @@ to download:
 | *TEancestral* | ="/path/to/EASYstrata/example_data/Mlag129.A1.TE.bed" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold.txt" |
 
-click [here](/example4.config) to see the example
+click [here](example_data/example4.config) to see the example
 
 ## 4 - launching the workflow : 
 

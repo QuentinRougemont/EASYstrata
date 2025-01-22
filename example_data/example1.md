@@ -4,24 +4,41 @@
 ## 1 download example data genome
 
 data needed:
- - genome assembly for haplotype1 (fasta)
- - genome assembly for haplotype2 (fasta)
- - ancestral genome assembly (fasta - proxy for the gene order)
- - ancestral genome annotation (gft file)
- - RNAseq data (single end or paired-end)
- - database of known TE elements 
- - txt file with the name of the ancestral sex chromosome and their orientation
- - optionally: database of known genes in closely related species
+ - genome assembly for haplotype1 (fasta: *genome1.hap1.fa.gz* in example data folder)
+ - genome assembly for haplotype2 (fasta: *genome2.hap2.fa.gz* in example data folder)
+ - ancestral genome assembly (fasta - proxy for the gene order: *Mlag129A1.fa.gz* in example data folder)
+ - ancestral genome annotation (gff file: *Mlag129A1.gff.gz* )
+ - RNAseq data (single end or paired-end: folder of fastq named *rnaseq* in example data folder)
+ - database of known TE elements (fasta: *TE.fa.gz* in example data folder) 
+ - txt file with the name of the ancestral sex chromosome and their orientation (see: *scaffold.txt*)
+ - optional : database of additional external genes evidence (fasta: *relatedprot.fa.gz* in example data folder)
+ 
+### donwload the data 
+
+```
+cd example_data
+#assemblies and annotation are all deposited on zenodo and available through wget:
+wget https://zenodo.org/records/14716941/files/data.tar.gz?download=1
+tar zxf data.tar.gz\?download\=1
+mv data/* .
+```
+
+this should contain all the necessary data mentionned earlier 
+
+genome1hap1 is the name of haplotype1
+
+genome2hap2 is the name of thaplotype2
+
+ancestral scaffold are provided directly in github example folder and consist in the following tab separated file (named **scaffold.txt**):  
+
+Mlag129A1       Mlag129A1_contig_8      R
+Mlag129A1       Mlag129A1_contig_11     N
 
 
-assemblies and annotation are all deposited on zenodo and available here: 
-
-to download: 
-
-`wget /path/to/zenodo/....tar.gz` #(to be updated later)
 
 ## 2 - setting your config file
 
+**WARNING** : replace /path/to by your true working path below.
 
 | option in config | description |
 | --- | --- |
@@ -47,7 +64,7 @@ to download:
 | *TEancestral* | ="/path/to/EASYstrata/example_data/Mlag129.A1.TE.bed" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold.txt" |
 
-click [here](/example1.config) to see the example
+click [here](example_data/example1.config) to see the example
 
 ## 3 - creating some files list: 
 
