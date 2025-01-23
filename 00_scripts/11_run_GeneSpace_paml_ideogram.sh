@@ -479,7 +479,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
        
         if [ -s 02_results/synteny_ancestral_sp_"$haplo1".txt ]
         then
-            size1=(wc -l   02_results/synteny_ancestral_sp_"$haplo1".txt)
+            size1=$(wc -l   02_results/synteny_ancestral_sp_"$haplo1".txt |awk '{print $1}')
         else
             echo "synteny file between ancestral species and $haplo1 is empty"
             echo "please check your data"
@@ -497,7 +497,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     
          if [ -s 02_results/synteny_ancestral_sp_"$haplo2".txt ]
          then
-             size2=(wc -l   02_results/synteny_ancestral_sp_"$haplo2".txt)
+             size2=$(wc -l   02_results/synteny_ancestral_sp_"$haplo2".txt |awk '{print $1}')
          else
              echo "synteny file between ancestral species and $haplo2 is empty"
              echo "please check your data"
@@ -518,7 +518,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     
          if [ -s 02_results/synteny_"$haplo1"_"$haplo2".txt ] ;
          then
-             size3=(wc -l   02_results/synteny_"$haplo1"_"$haplo2".txt)
+             size3=$(wc -l   02_results/synteny_"$haplo1"_"$haplo2".txt |awk '{print $1}')
          else
              echo "synteny file between $haplo1 and $haplo2 is empty"
              echo "please check your data"
@@ -543,7 +543,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
 
          if [ -s 02_results/synteny_"$haplo1"_"$haplo2".txt ] ;
          then
-             size3=(wc -l 02_results/synteny_"$haplo1"_"$haplo2".txt)
+             size3=$(wc -l 02_results/synteny_"$haplo1"_"$haplo2".txt |awk '{print $1}')
          else
              echo "synteny file between $haplo1 and $haplo2 is empty"
              echo "please check your data"
@@ -565,6 +565,8 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
            |sort \
            |uniq  \
             > 02_results/chromosomes.txt
+    awk '{print $1"\t"$3"\t"$4}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
+
     else
         awk '{gsub("_g[0-9]*.t[1-9]","\t",$0); print $2"\t"$3"\t"$4}' $file \
             |sort \
@@ -573,6 +575,8 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
             |sort \
             |uniq  \
             > 02_results/chromosomes.txt
+
+    awk '{print $1"\t"$2"\t"$3}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
 
     fi
     chromosomes="02_results/chromosomes.txt"
@@ -587,8 +591,8 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     eval "$(conda shell.bash hook)"
     conda activate superannot
     #conda deactivate 
-    awk '{print $1"\t"$3"\t"$4}' 02_results/paml/single.copy.orthologs_cleaned > 02_results/sco
-
+    
+    echo -e "~~~~~~~~~~~~~\ncreating ideogram plots\n~~~~~~~~~~~~"
     source config/config #to get infos on scaffold orientation 
     if [  -n "${links}" ] ; then    
         #links were provided and will be colored
@@ -658,17 +662,17 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     fi
     
     # ---------------------------------- step6 -- create circos plot --------------------------------
-    echo -e "\n~~~~~~~~~~~~~~~contstructing circos plots ~~~~~~~~~~~~~~~~~~~"
+    echo -e "\n~~~~~~~~~~~~~~~\n\tcontstructing circos plots\n ~~~~~~~~~~~~~~~~~~~"
 
     #check if a TEfile exist for genome1 and genome2:
     if [ -s haplo1/03_genome/"$haplo1".TE.bed ] ;
     then 
         genome1TE="haplo1/03_genome/"$haplo1".TE.bed"
-        annotateTE = "YES" 
+        annotateTE="YES" 
     elif [ -n "$TEgenome1" ] ;
     then 
         genome1TE="$TEgenome1"
-        annotateTE = "YES" 
+        annotateTE="YES" 
     else
         annotateTE="NO"
     fi
@@ -676,15 +680,16 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     if [ -s haplo2/03_genome/"$haplo2".TE.bed ] ;
     then 
         genome2TE="haplo2/03_genome/"$haplo2".TE.bed"
-        annotateTE = "YES" 
+        annotateTE="YES" 
     elif [ -n "$TEgenome2" ] ;
     then 
         genome2TE="$TEgenome2"
-        annotateTE = "YES" 
+        annotateTE="YES" 
     else
         annotateTE="NO"
     fi
 
+    echo -e "annotateTE is set $annotateTE" 
 
     if [ -n "${ancestral_genome}" ] ; then
 
@@ -922,7 +927,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
                 Yes ) rm -rf 02_results/modelcomp/ ; if [ -n "$ancestral_genome" ] ; then Rscript 00_scripts/Rscripts/06.MCP_model_comp.R YES else Rscript 00_scripts/Rscripts/06.MCP_model_comp.R NO ; fi  || \
             { echo -e "${RED} ERROR! changepoint failed - check your data\n${NC} " ; exit 1 ; } ;
                 break;;
-                No ) ; exit;;
+                No ) exit;;
             esac
         done
     else
@@ -936,7 +941,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
        fi
     fi 
 elif [[ $options = "changepoint" ]]
-    then
+then
 
     #eval "$(conda shell.bash hook)"
     #conda activate superannot
@@ -969,6 +974,9 @@ elif [[ $options = "changepoint" ]]
 
 fi 
 
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "~ \tcreating ideogram colored by strata\t ~"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 for links in 02_results/modelcomp/noprior/classif.s*haplo1.haplo2 ; 
 do 
@@ -1122,6 +1130,11 @@ cat 02_results/bed/"$haplo1".7strata.bed 02_results/bed/"$haplo2".7strata.bed> 0
 cat 02_results/bed/"$haplo1".8strata.bed 02_results/bed/"$haplo2".8strata.bed> 02_results/bed/"$haplo1"."$haplo2".8strata.bed
 cat 02_results/bed/"$haplo1".9strata.bed 02_results/bed/"$haplo2".9strata.bed> 02_results/bed/"$haplo1"."$haplo2".9strata.bed
 
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "~ \tcreating circos colored by strata\t ~"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
 if [ -n "${ancestral_genome}" ] ; then
     echo ancestral genome provided 
     for links in 02_results/bed/ancestralspecies$haplo1.*.strata.bed ; do
@@ -1184,9 +1197,14 @@ for links in 02_results/bed/"$haplo1"."$haplo2".*strata.bed ; do
 done
 
 #now we will do the same discretisation of dS for plotting in ideogram: 
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "~ \tcreating ideogram colored by dS values\t ~"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+
 if [  -n "${ancestral_genome}" ] ; then
     echo -e "ancestral genome was provided for inference" 
-    if [ -n $scafforientation ] ; then
+    if [ -n "$scafforientation" ] ; then
         echo -e "particular orientation will be used"
         #we will make an ideogram with it 
         if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
@@ -1196,7 +1214,7 @@ if [  -n "${ancestral_genome}" ] ; then
                 -d 02_results/dS.values.forchangepoint.txt \
                 -f "$ancestral_genome".fai \
                 -g haplo1/03_genome/"$haplo1".fa.fai \
-                -s "$scafforientation" \
+                -s "$scafforientation" 
         then
              echo -e "\nERROR: ideograms failed /!\ \n
              please check logs and input data\n" 
@@ -1219,7 +1237,7 @@ if [  -n "${ancestral_genome}" ] ; then
     fi
 fi
 
-if [ -n $scafforientation ] ; then
+if [ -n "$scafforientation" ] ; then
     echo -e "particular orientation will be used"
 
     if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
@@ -1229,7 +1247,7 @@ if [ -n $scafforientation ] ; then
         -d 02_results/dS.values.forchangepoint.txt \
         -f haplo1/03_genome/"$haplo1".fa.fai \
         -g haplo2/03_genome/"$haplo2".fa.fai \
-        -s "$scafforientation" \
+        -s "$scafforientation" 
     then
         echo -e "\nERROR: ideograms failed /!\ \n
         please check logs and input data\n" 
@@ -1243,4 +1261,10 @@ else
         -d 02_results/dS.values.forchangepoint.txt \
         -f haplo1/03_genome/"$haplo1".fa.fai \
         -g haplo2/03_genome/"$haplo2".fa.fai 
+    then
+        echo -e "\nERROR: ideograms failed /!\ \n
+        please check logs and input data\n" 
+        exit 1
+    fi
+
 fi

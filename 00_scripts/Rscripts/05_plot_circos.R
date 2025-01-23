@@ -115,6 +115,11 @@ writeLines(paste0("\nreference is ", reference,"\n"))
 writeLines(paste0("haplo is ", haplo, "\n"))
 writeLines("~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
+#------------- check that libraries are installed and load them ---------------#
+packages <- c('magrittr')
+#---------------- load libraries ---------------------------------------------#
+install.packages(setdiff(packages, rownames(installed.packages())), repos="https://cloud.r-project.org" )
+invisible(lapply(packages, suppressMessages(suppressWarnings(suppressPackageStartupMessages(library))), character.only = TRUE))
 
 #------------- Import other files ---------------------------------------------#
 # import synteny data
@@ -161,7 +166,7 @@ writeLines("\n~~~~~~ data loaded ~~~~~~~\n")
 
 #if all is good:
 #------------- check that libraries are installed and load them ---------------#
-packages <- c('circlize','dplyr','tidyr','wesanderson','magrittr','optparse')
+packages <- c('circlize','dplyr','tidyr','wesanderson')
 #---------------- load libraries ---------------------------------------------#
 
 install.packages(setdiff(packages, rownames(installed.packages())), repos="https://cloud.r-project.org" )

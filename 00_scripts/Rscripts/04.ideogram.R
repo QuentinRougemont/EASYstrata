@@ -60,7 +60,7 @@ parser <- OptionParser(usage = "%prog -c single-copy-orthologs -i bed_file_speci
 opt = parse_args(parser)
 
 if(opt$v){
-  cat(paste0("script to perform CIRCOS plot\n\n"))
+  cat(paste0("script to construct ideogram plot\n\n"))
   cat(paste0("\033[0;41m","COMPULSORY PARAMETERS:","\033[0m","\n")) 
   cat(paste0("\t--single_copy_orthologs (-c): ", opt$sco,"\n"))
   cat(paste0("\t--fai_haplo1: index file of haplotype1 (-f): ", opt$fai1,"\n"))
@@ -68,7 +68,7 @@ if(opt$v){
   cat(paste0("\t--bed_haplo1 (-i bed file of gene for haplo1): ", opt$bed1,"\n"))
   cat(paste0("\t--bed_haplo2 (-j bed file of gene for haplo2): ", opt$bed2,"\n"))
   cat(paste0("\033[0;42m","optional parameters:\n","\033[0m"))
-  cat(paste0("\t--scaffold_orientation (-s): bed file of TE for sp1", opt$scaffold_orientation,"\n"))
+  cat(paste0("\t--scaffold_orientation (-s): ", opt$scaffold_orientation,"\n"))
   cat(paste0("\t--links (-l): bed file of links  to highlight", opt$links,"\n"))
   cat(paste0("\t--ds (-d): path to the ds file obtained previously use to color the links", opt$ds,"\n\n"))
 }
@@ -313,6 +313,11 @@ if(!exists("links")) {
     #all$fill[match(links$gene1,all$gene1)] <- links$fill
 }
 
+#create dir if not present:
+if (!dir.exists("02_results/ideogram")){
+  dir.create("02_results/ideogram")
+}
+
 
 #export the joint bed:
 write.table(all, paste0("02_results/ideogram/joint_", sp1, "_" , sp2, ".bed" ) , sep="\t", row.names =F, col.names=T, quote = F)
@@ -367,11 +372,6 @@ karyo <- rbind(index1, small, index2)
 #bits of code to rework depending on wether species 1 or species 2 is the one with the smallest genome size 
 #if not ordered properly the script will fail
 all %<>% select(Species_1,Start_1,End_1,Species_2,Start_2,End_2,fill) 
-
-#create dir if not present:
-if (!dir.exists("02_results/ideogram")){
-  dir.create("02_results/ideogram")
-}
 
 
 #if (is.null(opt$links)) {
