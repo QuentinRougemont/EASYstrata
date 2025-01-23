@@ -64,7 +64,7 @@ Mlag129A1       Mlag129A1_contig_11     N
 | *TEancestral* | ="/path/to/EASYstrata/example_data/Mlag129.A1.TE.bed" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold.txt" |
 
-click [here](example_data/example2.config) to see the full config file example 
+click [here](example2.config) to see the full config file example 
 
 ## 3 - creating some files: 
 list of bam: 

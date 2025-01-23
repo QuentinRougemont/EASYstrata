@@ -59,7 +59,7 @@ based on the previous data it is very easy to set up the config file:
 | *TEancestral* | ="" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold_example3.txt" |
 
-click [here](example_data/example3.config) to see the full config file example 
+click [here](example3.config) to see the full config file example 
 
 ## 3 - creating some files: 
 

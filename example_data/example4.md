@@ -61,7 +61,7 @@ Mlag129A1       Mlag129A1_contig_11     N
 | *TEancestral* | ="/path/to/EASYstrata/example_data/Mlag129.A1.TE.bed" |
 | *scaffolds* | ="/path/to/EASYstrata/example_data/scaffold.txt" |
 
-click [here](example_data/example4.config) to see the example
+click [here](example4.config) to see the example
 
 ## 4 - launching the workflow : 
 

@@ -346,7 +346,7 @@ The resulting depth by position, mean depth and plots can be found in : `haplo1/
 
 ![depth.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/depth.png)
 
-
+Figure 1 : example RNAseq depth along some of the Microbotryum lychnidis dioicae chromosome
 
 ### 2\. TE discovery and masking
 
@@ -429,14 +429,16 @@ If you provided one genome containing both sex/mating type chromosomes, only the
     
 - Construction of synteny plot on the focal scaffolds using **pafR**
     
-ex: minimap based divergence along the mating type chromosomes :
 
 ![Fig2.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig2.png)
 
-ex: minimap based whole genome alignment : 
+Figure 2: minimap based divergence along the mating type chromosomes
+
+
 	
 ![Fig3.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig3.png)
 
+Figure 3 minimap based whole genome alignment 
 
 
 ### 4b. Ortholog reconstruction
@@ -449,9 +451,13 @@ In short, this will:
 \- Construct a riparian plot on focal scaffolds \[==GeneSpace==\]  
 For more information, consult the [GeneSpace readme](https://github.com/jtlovell/GENESPACE).
 
-ex: Synteny plot from GeneSpace
 
 ![Fig4.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig4.png)
+
+Figure 4: A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
+
+### Note: the same figure can be colored automatically according to discrete quantile values (insert figure [here](). Strata can be displayed as colored external links can be (insert figure [here]()).  
+
 
 
 # III - Plot dS along the genome
@@ -489,9 +495,12 @@ dS values are plotted along the focal scaffolds, and, if 2 haplotypes were given
 The gene order will be that of the genome used as proxy for the ancestral state: either one of the two sex/mating type chromosomes, or an outgroup (see option *ancestral*).  
 It is possible to modify the R script to adapt the plotting options to your needs (for instance position and direction of scaffolds).
 
-Ex: Ds plot : 
 
 ![Fig5.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig5.png)
+
+Figure 5: Ds plot and arrangements. A) dS values along the ancestral chromosomes. B) dS values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
+C) and D) arrangement as infered based on gene rank in mating type A1 and A2 respectively. 
+
 
 
 ### === - Plot circos (==step III==)
