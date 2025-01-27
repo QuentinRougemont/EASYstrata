@@ -89,8 +89,15 @@ then
             echo -e "WARNING - you have not provided any external data\n"
             echo -e "braker will try running with RNAseq only\n\n" 
         else
-            echo -e "related protein is $relatProt\n\n"
-            relatProt="$RelatedProt"
+            echo -e "related protein is $RelatedProt\n\n"
+            if file --mime-type "$RelatedProt" | grep -q gzip$; then
+              echo "$RelatedProt is gzipped"
+              gunzip "$RelatedProt"
+              relatProt=${RelatedProt%.gz}
+           else
+              echo "$RelatedProt is not gzipped"
+              relatProt=$RelatedProt
+           fi
         fi
 else
     clades=("Metazoa" 

@@ -167,7 +167,7 @@ awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER3"/"$database".fa.masked.masked.out 
 
 cat Round*bed >> ../raw."$database".TE.bed
 #make overly simplistic bed: 
-grep -v "Simple\|Low" ../raw."$database".TE.bed > ../03_genome/"$genome".TE.bed
+grep -v "Simple\|Low" ../raw."$database".TE.bed > ../03_genome/"$base".TE.bed
 
 #RepeatMasker -pa 18 -e ncbi -lib unknown.fa  -dir "$FOLDER4" "$FOLDER3"/"$base".masked.masked.masked 2>&1 | \
 #    tee ../$LOG_FOLDER/F4_repeatmasker_"$base"."$TIME".log  ||\

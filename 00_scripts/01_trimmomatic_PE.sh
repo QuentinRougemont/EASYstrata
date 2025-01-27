@@ -34,11 +34,20 @@ mkdir 02_trimmed  2>/dev/null
 ADAPTERFILE="Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa"
 NCPU="$NCPUS_TRIMMO"
 
-for file in 02_trimmed/*gz 
-do
-    if [ ! -s "${file}" ] 
-    then
-    
+minsize=150999000 #any file smaller than this (150 mb) will be ignored and recreated
+output="02_trimmed/"$base"_R1.paired.fastq.gz"
+if [ -s $output ]
+then
+    filesize=$(wc -c <$output )
+else
+    filesize=0
+fi
+
+echo filesize is "$filesize"
+
+if [ "$filesize" -lt "$minsize" ]
+then
+    echo "running trimmomatic"
     java -jar -Xmx10G Trimmomatic-0.39/trimmomatic-0.39.jar PE \
         -threads "$NCPU" \
         -phred33 \
@@ -55,8 +64,7 @@ do
         SLIDINGWINDOW:30:30 \
         MINLEN:36 2> $LOG_FOLDER/log.trimmomatic.pe."$base"."$TIMESTAMP"
         
-    else
-        echo "file $base already present"
-    fi
-done
+else
+    echo "file $base already present"
+fi
 

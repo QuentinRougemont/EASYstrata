@@ -48,9 +48,13 @@ p <- a %>%
   ylab('mean DP') # + th_plot
 
 
-#create dir if not present:
-if (!dir.exists("Depth")){
-  dir.create("Depth")
+#create dir:
+if (!dir.exists("02_results")){
+  dir.create("02_results/")
+}
+
+if (!dir.exists("02_results/RNA_depth")){
+  dir.create("02_results/RNA_Depth")
 }
 
 #export :
@@ -59,5 +63,3 @@ for(i in 1:n_pages(p)){
     facet_wrap_paginate(~ V1, ncol = 1, nrow = 8, scales = 'free', page = i)
   ggsave(plot = p_save, width = 16, height =16, filename = paste0('Depth/',input2, '_', i, '.pdf'))
 }
-
-#to do: copy Depth in general results folder

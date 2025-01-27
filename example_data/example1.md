@@ -72,7 +72,7 @@ if you have PE data we expect two column file with R1 in column1 and R2 in colum
 
 simply use a command like this: 
 
-`readlink -f your_rna_folder/*gz |awk 'ORS=NR%2?FS:RS ' > rnaseq.list.PE.txt `  
+`readlink -f your_rna_folder/*gz |awk 'ORS=NR%2?FS:RS ' |sed 's/ /\t/' > rnaseq.list.PE.txt `  
 
 other multi column link could be generated similarly with awk if needed
 
@@ -81,26 +81,27 @@ I like to use the `readlink -f` command to extract full path and add them to txt
 
 ## 3 - launching the workflow : 
 
+**don't foreget to copy the example1.config in config folder!**  
 
-```./master.sh -o1 2>&1 |tee log```
+cp example1.config config/config
 
+```sh
+./master.sh -o1 2>&1 |tee log
+```
 
 ## 4 - results visualisation :
-
-insert resulting plots and other stats here
-
 
 
 ![Fig4.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig4.png)
 
-Figure 1: A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
+**Figure 1:** A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
 
 
 
 
 ![Fig5.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig5.png)
 
-Figure 5: Ds plot and arrangements. A) dS values along the ancestral chromosomes. B) dS values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
+**Figure 5:** Ds plot and arrangements. A) dS values along the ancestral chromosomes. B) dS values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
 C) and D) arrangement as infered based on gene rank in mating type A1 and A2 respectively. 
 
 
@@ -210,12 +211,18 @@ automatically generated for each changepoint values:
 **Figure 9:** dS values plotted along the ancestral genome for all possible models from three to eight changepoints  
 each point is a gene dS value colored according to the strata of assignation
 
-a posterior colored ideogram: 
+a posteriori colored ideogram: 
 automatically generated for each changepoint values: 
 ![Fig10.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig10.png)
 
 **Figure10:**  example ideograms infered for the most likely models here. Links are colored according to their strata of appartenance. 
 
 
+![Fig11.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig11.png)
 
-# to do: add circos plots colored by Ds quantile and strata - same with ideogram
+**Figure11:** circos plot with external links based on inferred strata
+
+![Fig12.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig12.png)
+
+**Figure12:** circos plot with inner links based on quantiles of Ds values
+

@@ -346,7 +346,7 @@ The resulting depth by position, mean depth and plots can be found in : `haplo1/
 
 ![depth.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/depth.png)
 
-Figure 1 : example RNAseq depth along some of the Microbotryum lychnidis dioicae chromosome
+**Figure 1:** example RNAseq depth along some of the Microbotryum lychnidis dioicae chromosome
 
 ### 2\. TE discovery and masking
 
@@ -400,17 +400,23 @@ will enable to infer gene order for dS interpretation
 
 ## Input of step II
 
-### Parameters set in config ==in yellow parameters to be set==
+### Important Parameters set in config 
 
 |     |     |
 | --- | --- |
 | **option in config** | **description** |
-| *==ancestral==* | "chromosome" or "outgroup", whether the sequence used as proxy for the ancestral state is one of the sex / mating type chromosomes or an ougroup provided below. |
-| ==\[*ancestral_chromosome_scaffolds*\]== | Compulsory if *ancestral* is set as "chromosome". Full path to the list of scaffolds of the chromosome used as proxy for ancestral state. |
-| \[*==outgroup_orthofinder==*\] | Advised if *ancestral* is set as "chromosome". Full path to a list of genomes to be used as outgroups in OrthoFinder only. |
-| ==\[*ancestral_outgroup_scaffolds*\]== | Compulsory if *ancestral* is set as "outgroup". Full path to the list of focal scaffolds for the outgroup used as proxy for ancestral state. |
+| --- | --- |
+| *genome1* | **Compulsory:** Full path to the input assembly, either a genome containing both sex/mating-type chromosomes, or a haplotype containing one of the sex/mating-type chromosomes. (ex: /path/to/genome1.hap1.fa.gz) |
+| *haplotype1* | **Compulsory:** Name of the genome1 to be used as a /contig/scaffold/chromosome basename. (ex: genome1.hap1) |
+| \[*genome2*\] | **Optional:** In the case where a haplotype containing one of the sex/mating-type chromosomes was provided as '*genome1*'. Full path to the input assembly of the haplotype containing the second sex/mating-type chromosome. |
+| \[*haplotype2*\] | **Compulsory if genome2 was provided** Name of the second haplotype. This can be a basename of all chromosomes if a second assembly is avaiable, or the name of the scaffold/contig/chromosomes corresponding to the sex/MAT chromosome (e.g. species_chrY). |
+| \[*gtf1*\] | **Optional**. Full path to a .gtf file for an existing gene prediction on *genome1*. |
+| \[*gtf2*\] | **Optional** Full path to a .gtf file for an  existing gene prediction on *genome2*. |
+several days for a big dataset. |
+| \[*ancestral_genome*\] | **Optional (but recommended):** Full path to the genome of the species used as proxy for the ancestral state. |
+| \[*ancestral_gff*\] | **Compulsory if '*ancestral_genome*' is given** Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
+| *scaffolds* | **Compulsory** Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex/mating-type chromosomes). |
 
-==Give examples of files for scaffolds, ancestral_chromosome_scaffolds, outgroup_orthofinder and ancestral_outgroup_scaffolds ?==
 
 ### Operations of step II
 
@@ -432,13 +438,13 @@ If you provided one genome containing both sex/mating type chromosomes, only the
 
 ![Fig2.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig2.png)
 
-Figure 2: minimap based divergence along the mating type chromosomes
+**Figure 2:** minimap based divergence along the mating type chromosomes
 
 
-	
+
 ![Fig3.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig3.png)
 
-Figure 3 minimap based whole genome alignment 
+**Figure 3:** minimap based whole genome alignment 
 
 
 ### 4b. Ortholog reconstruction
@@ -454,9 +460,13 @@ For more information, consult the [GeneSpace readme](https://github.com/jtlovell
 
 ![Fig4.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig4.png)
 
-Figure 4: A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
+**Figure 4:** A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
 
-### Note: the same figure can be colored automatically according to discrete quantile values (insert figure [here](). Strata can be displayed as colored external links can be (insert figure [here]()).  
+### Note: the same figure can be colored automatically according to discrete quantile values:
+
+ (insert figure [here](). )
+ 
+Strata can be displayed as colored external links can on the circos :
 
 
 
@@ -498,7 +508,7 @@ It is possible to modify the R script to adapt the plotting options to your need
 
 ![Fig5.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig5.png)
 
-Figure 5: Ds plot and arrangements. A) dS values along the ancestral chromosomes. B) dS values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
+**Figure 5:** Ds plot and arrangements. A) dS values along the ancestral chromosomes. B) dS values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
 C) and D) arrangement as infered based on gene rank in mating type A1 and A2 respectively. 
 
 
@@ -632,17 +642,25 @@ each point is a gene dS value colored according to the strata of assignation.
 dS colored by strata along the ancestral genome:
 
 automatically generated for each changepoint values: 
+
 ![Fig9.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig9.png)
 
 **Figure 9:** dS values plotted along the ancestral genome for all possible models from three to eight changepoints  
 each point is a gene dS value colored according to the strata of assignation
 
-a posterior colored ideogram: 
+a posteriori colored ideogram: 
 automatically generated for each changepoint values: 
 ![Fig10.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig10.png)
 
 **Figure10:**  example ideograms infered for the most likely models here. Links are colored according to their strata of appartenance. 
 
+![Fig11.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig11.png)
+
+**Figure11:** circos plot with external links based on inferred strata
+
+![Fig12.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig12.png)
+
+**Figure12:** circos plot with inner links based on quantiles of Ds values
 
 
 

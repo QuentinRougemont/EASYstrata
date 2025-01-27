@@ -26,8 +26,11 @@ fi
 
 fi
 echo -e "\n\ntrimming read for RNAseq\n" 
-#paste <(ls 01_raw_data/*1.f**q.gz ) <(ls 01_raw_data/*2.f**q.gz ) > file1file2.tmp
 
+#in case there would be space instead of tab:
+awk -v OFS="\t" '$1=$1' "$RNAseqlist" > tmp
+mv tmp "$RNAseqlist" 
+rm tmp
 ncol=$(awk '{print NF}'  "$RNAseqlist" |uniq)
 
 if [[ $ncol = 2 ]] ; then

@@ -67,9 +67,20 @@ use readlink to set full path to text files
 
 ## 4 - launching the workflow : 
 
+simply run : 
 
-```./master.sh -o1 2>&1 |tee log```  
+```sh
+./master.sh -o1 2>&1 |tee log
+``` 
+ 
+## 5 - Results : 
 
-## 5 - launching the workflow :  
+the major difference here is that all results plots will be made relatively to the current genome, not to the ancestral genome
 
-insert resulting plots and other stats here
+this can be a bit problematic to draw accurate inferrence, especially if both haplotype do not recombine.
+
+For the sake of example we provide "fake" data from microbotryum, but beware that the biological results are not necessarily meaningfull: 
+
+
+
+## 

@@ -84,7 +84,7 @@ then
     #plot depth along the genome:
     Rscript ../../00_scripts/Rscripts/plot_dp.R "$base".dp.gz
     
-    else 
+else 
     echo "BAM file already present" 
     echo "please check the data" 
 fi   

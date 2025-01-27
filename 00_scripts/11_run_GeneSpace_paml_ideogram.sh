@@ -432,18 +432,28 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
         
     echo "ancestral genome ID is $ancestral " 
       
-       if [[ $haplo1 == $haplo ]] ;
-       then
-             echo " " ;
-           awk -v var1="$haplo1" -v var2="$haplo2" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
-           | grep -Ff <(awk '{print $2}' "$scaffold") - > orthologues
-       sed -i -e "s/\r//g" orthologues
-       else
-           echo "not egal - reversing haplotype names to match columns"
-           awk -v var1="$haplo2" -v var2="$haplo1" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
-           | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$4"\t"$6}' > orthologues
-           sed -i -e "s/\r//g" orthologues
-      fi
+        if [[ $haplo1 == $haplo ]] ;
+        then
+            echo " " ;
+            awk -v var1="$haplo1" -v var2="$haplo2" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
+                   | grep -Ff <(awk '{print $2}' "$scaffold") - > orthologues
+            sed -i -e "s/\r//g" orthologues
+         elif [[ $haplo2 == $haplo ]] ;
+         then
+             echo "not egal - reversing haplotype names to match columns"
+             echo "first column is $haplo"
+             awk -v var1="$haplo2" -v var2="$haplo1" -v var3="$ancestral" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
+                | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$4"\t"$6}' > orthologues
+             sed -i -e "s/\r//g" orthologues
+         elif [[ ancestral_sp == $haplo ]] ;
+         then
+             echo "not egal - reversing haplotype names to match columns"
+             echo "first column is $haplo"
+             awk -v var1="$ancestral" -v var2="$haplo1" -v var3="$haplo2" 'NF==6 && $4 ~ var1 && $5 ~ var2 && $6 ~ var3 ' $pathN0 \
+                  | grep -Ff <(awk '{print $2}' "$scaffold") - |awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$4}' > orthologues
+             sed -i -e "s/\r//g" orthologues
+    
+        fi
 
     else
        #echo "assuming no ancestral species:" 
@@ -1268,3 +1278,5 @@ else
     fi
 
 fi
+
+echo "all analyses finished"

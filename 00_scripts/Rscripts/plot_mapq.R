@@ -45,9 +45,9 @@ p <- a %>%
   ylab('mapq') # + th_plot
 
 
-#create dir if not present:
-if (!dir.exists('mapq')){
-  dir.create('mapq')
+#create dir :
+if (!dir.exists('02_results/RNA_mapq')){
+  dir.create('02_results/RNA_mapq')
 }
 
 #export :
@@ -56,5 +56,3 @@ for(i in 1:n_pages(p)){
     facet_wrap_paginate(~ V2, ncol = 1, nrow = 8, scales = 'free', page = i)
   ggsave(plot = p_save, width = 16, height =16, filename = paste0('mapq/',input2, '_', i, '.pdf'))
 }
-
-#to do: copy mapq in general results folder
