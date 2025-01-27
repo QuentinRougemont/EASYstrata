@@ -654,11 +654,11 @@ automatically generated for each changepoint values:
 
 **Figure10:**  example ideograms infered for the most likely models here. Links are colored according to their strata of appartenance. 
 
-![Fig11.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig11.png)
+![Figure11.svg](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Figure11.svg)
 
 **Figure11:** circos plot with external links based on inferred strata
 
-![Fig12.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig12.png)
+![Figure12.svg](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Figure12.svg)
 
 **Figure12:** circos plot with inner links based on quantiles of Ds values
 
