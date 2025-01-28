@@ -45,7 +45,7 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
 Installation: 
 -------
 
-- [Installation instructions](:/f3e842a69b234bb3bd8f17b014c5ec80)
+- [Installation instructions](INSTALL/INSTALL.md)
 
 
 
@@ -120,11 +120,12 @@ this will:
 *    Run **paml** to estimate synonymous divergence (d<sub>S</sub>) between the sequences/regions of interest
 *   Perform various plots: 
     *   circos plot,
-    *   d<sub>S<sub> along the genome, 
+    *   d<sub>S</sub> along the genome, 
     *   ideogram, 
     *   etc. (example plots are given below) 
-*    Infer the most likely number of evolutionary strata using a changepoint analysis: 
-    *   estimates most likely number of strata (model weight)  ,
+
+*   estimates most likely number of strata (model weight)  ,
+
     *   use Bayes-Factors to assess differences among strata ,
     *   plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots,
     *   plot circos colored based on numbers of strata,
@@ -363,10 +364,8 @@ Corresponding script: ./00_scripts/06_braker.sh
     
 - One round of gene prediction using RNA-seq data, using **braker** (only with options *a* and *b*)
     
-- Quality assessment and reports production for each round of gene prediction
-    
-
-Two tools can be used at this stage for quality assessment:  
+- Quality assessment and reports production for each round of gene prediction. 
+    Two tools are used for quality assessment:  
 \- **Busco** (corresponding script: `00_scripts/07_busco_after_braker.sh`)  
 \- **Braker** report on the raw hintsfile  
 This report includes number of genes, number of introns per gene, gene support, number of complete genes and various histograms useful for error checking.
@@ -375,12 +374,12 @@ This report includes number of genes, number of introns per gene, gene support, 
 
 Please read the [TSEBRA manual](https://github.com/Gaius-Augustus/TSEBRA) before running the script.  
 The best round of protein-based gene prediction and the RNA-seq-based gene prediction are given as input in TSEBRA.  
-Warning: TSEBRA parameters *intron_support* and *stasto_support* are set to 0 in this workflow (default in TSEBRA: 1 and 2 respectively). This means that only overlapping genes between the two gene models will be filtered. You can change this parameter and others to adjust to your desired level of stringency in the TSEBRA config file: `config/default.cfg`
+**Warning:** TSEBRA parameters *intron_support* and *stasto_support* are set to 0 in this workflow (default in TSEBRA: 1 and 2 respectively). This means that only overlapping genes between the two gene models will be filtered. You can change this parameter and others to adjust to your desired level of stringency in the TSEBRA config file: `config/default.cfg`
 
 - Final genome annotation reshaping
 
 **if RNAseq is used:** The final genome annotation  is the output from TSEBRA.  
-**without RNAseq*:** The final genome annotation is the best protein-based braker round, as evaluated with busco.
+**without RNAseq:** The final genome annotation is the best protein-based braker round, as evaluated with busco.
 
 Corresponding script: `00_scripts/08_braker_reshaping.sh`  
 The genes will be renamed to insert the scaffold name for clarity in downstream analyses.  
@@ -388,7 +387,7 @@ Because the next steps in the workflow involve single copy ortholog identificati
 
 - Final genome annotation quality assessment
 
-Two more in-depth tools can be used at this stage for quality assessment: (==\+ busco on final genome pred ?==)  
+Two more in-depth tools can be used at this stage for quality assessment:   
 \- **Blast** against **Uniprot**  
 If you wish to skip this, comment l.295 of the script `00_scripts/08_braker_reshaping.sh`  
 \- **InterProScan** (if option interpro is set to "YES" in the config file and Blast against Uniprot successfully ran)  
