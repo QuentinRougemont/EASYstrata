@@ -1,6 +1,6 @@
-Mlyc1064a2	Mlyc1064a2_A2   0
-Mlyc1064a2	Mlyc1064a2_MC12 0
-Mlyc1064a1	Mlyc1064a1_A1   0
-Mlyc1064a1	Mlyc1064a1_MC12 1
+genome2	genome2_A2   0
+genome2	genome2_MC12 0
+genome1	genome1_A1   0
+genome1	genome1_MC12 1
 Mlag129A1	Mlag129A1_contig_8 0
 Mlag129A1	Mlag129A1_contig_11 0

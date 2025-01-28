@@ -66,7 +66,7 @@ PLEASE, carefully read the user guide below before any attempt at running the wo
 
 ### In short : 
 
-simply run:
+set every path to your data and settings in the [config file](config/config) and  simply run:
 ```
 ./master.sh --help #to see all options 
 ```
