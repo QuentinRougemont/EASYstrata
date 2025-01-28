@@ -115,24 +115,24 @@ To do so, run :
 
 this will:
 
-*	 Perform TE annotation using **repeatmodeller** (de-novo prediction) and **repeatMasker**
-*	 Perform gene prediction on the softmasked genome using **BRAKER** (with or without RNAseq). 
-*	 Evaluate the quality of the gene prediction (mainly using **BUSCO**)
-*	 Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny. This includes the inference of single copy orthologs by **orthofinder**
-*	 Run **minimap** between genes to infer gene synteny
-*	Run **paml** to estimate synonymous divergence (d<sub>S</sub>) between the sequences/regions of interest
-*	Perform various plots: 
-	*		 circos plot,
-	*		 d<sub>S</sub> along the genome, 
-	*		 ideogram, 
-	*		 etc. (example plots are given below) 
-*	Infer the most likely number of evolutionary strata using a changepoint analysis and produce plots with the results: 
-	*		 estimates most likely number of strata (model weight)  ,
-	*		 use Bayes-Factors to assess differences among strata ,
-	*		 plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots
-	*		 plot circos colored based on numbers of strata
-	*		 plot ideogram colored based on numbers of strata 
-	*		 plot strata numbers along the genome and along ancestral order
+*     Perform TE annotation using **repeatmodeller** (de-novo prediction) and **repeatMasker**
+*     Perform gene prediction on the softmasked genome using **BRAKER** (with or without RNAseq). 
+*     Evaluate the quality of the gene prediction (mainly using **BUSCO**)
+*     Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny. This includes the inference of single copy orthologs by **orthofinder**
+*     Run **minimap** between genes to infer gene synteny
+*    Run **paml** to estimate synonymous divergence (d<sub>S</sub>) between the sequences/regions of interest
+*    Perform various plots: 
+    *         circos plot,
+    *         dS along the genome, 
+    *         ideogram, 
+    *         etc. (example plots are given below) 
+*    Infer the most likely number of evolutionary strata using a changepoint analysis and produce plots with the results: 
+    *         estimates most likely number of strata (model weight)  ,
+    *         use Bayes-Factors to assess differences among strata ,
+    *         plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots
+    *         plot circos colored based on numbers of strata
+    *         plot ideogram colored based on numbers of strata 
+    *         plot strata numbers along the genome and along ancestral order
 
 The following options allow you to run only certain parts of the workflow.
 
@@ -275,10 +275,12 @@ For an example of input files, we provide an [example data folder](https://githu
 | \[*ancestral_genome*\] | **Optional (but recommended):** Full path to the genome of the species used as proxy for the ancestral state. |
 | \[*ancestral_gff*\] | **Compulsory if '*ancestral_genome*' is given** Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
 | *scaffolds* | **Compulsory** Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex/mating-type chromosomes). |
+| \[*TEgenome1=*\] | **Optional**. Full path to a bed file of TE on *genome1*. |
+| \[*TEgenome2=*\] | **Optional** Full path to a bed file of TE on *genome2*. |
+| \[*TEancestral=*\] | **Optional**. Full path to a bed file of TE for the ancestral genome. |
+| \[*gtf2*\] | **Optional** Full path to a .gtf file for an  existing gene prediction on *genome2*. |
 
 
-
-# PART BELOW TO BE UPDATED : 
 
 
 # Details of the worfklow and results
@@ -412,7 +414,6 @@ will enable to infer gene order for dS interpretation
 | \[*haplotype2*\] | **Compulsory if genome2 was provided** Name of the second haplotype. This can be a basename of all chromosomes if a second assembly is avaiable, or the name of the scaffold/contig/chromosomes corresponding to the sex/MAT chromosome (e.g. species_chrY). |
 | \[*gtf1*\] | **Optional**. Full path to a .gtf file for an existing gene prediction on *genome1*. |
 | \[*gtf2*\] | **Optional** Full path to a .gtf file for an  existing gene prediction on *genome2*. |
-several days for a big dataset. |
 | \[*ancestral_genome*\] | **Optional (but recommended):** Full path to the genome of the species used as proxy for the ancestral state. |
 | \[*ancestral_gff*\] | **Compulsory if '*ancestral_genome*' is given** Full path to the gff (genome annotation) of the species used as proxy for the ancestral state. |
 | *scaffolds* | **Compulsory** Full path to the list of focal scaffolds (i.e. the scaffolds composing the sex/mating-type chromosomes). |

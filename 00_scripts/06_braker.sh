@@ -100,6 +100,8 @@ then
            fi
         fi
 else
+    echo "orthoDBspecies is $target"
+
     clades=("Metazoa" 
         "Vertebrata" 
         "Viridiplantae" 
@@ -123,16 +125,17 @@ else
             if [ -f "$file" ] 
             then
                 echo "warning file $target.fa already present "
-                echo "please verify if this is the file that you need"
-        #       exit 1 
+                #should always be wrong since we rm the folder
             else
                 wget -q https://bioinf.uni-greifswald.de/bioinf/partitioned_odb12/"${target}".fa.gz
                 gunzip "${target}".fa.gz
                 cd ../ 
                 if [ -z ${RelatedProt+x} ] ; then
                     echo "no related protein"
-                    cp odb11/"${target}".fa  relatProt.fa
+                    mv odb11/"${target}".fa  relatProt.fa
+                    relatProt="relatProt.fa"
                 else
+                    echo "combining $RelatedProt odb11 data" 
                     cat "$RelatedProt"  odb11/"${target}".fa > relatProt.fa
                     relatProt="relatProt.fa"
                 fi
@@ -169,6 +172,7 @@ then
     then
         echo "file $output RNAseq already exist will skip the run"
     else
+        echo "starting annotation with RNAseq data only"
         mkdir -p $wd
 
         if [[ $fungus = "YES" ]]
@@ -190,6 +194,9 @@ if [[ -z "$relatProt" ]]
 then
     echo "no related protein - only RNAseq were used"
     exit
+else
+    echo "will annotate with $relatProt "
+    echo "will perform 5 independant run of braker"
 fi
 
 #prepare architecture:
