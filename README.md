@@ -198,7 +198,7 @@ If you already have the synteny inference and only want to produce synteny plots
 
 This is useful for customizing plots.
 
-Table of options:
+**Summary table of options:** 
 | Option: | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
 |:----:| ---| --- | --- | --- | --- | --- | --- | --- |
 | TE prediction | X | X |   |   |   | X |   |   |
@@ -211,7 +211,9 @@ Table of options:
 
 ### Restart at any step 
 
-This workflow is designed to work at any step in the process. In case of bug you can restart it from whenever it crashes (after fixing the bug) and this should work smoothly.
+This workflow is designed to work at any step in the process. 
+
+In case of bug you can restart it from whenever it crashes (after fixing the bug) and this should work smoothly.
 
 
 ## Input data 
@@ -219,7 +221,7 @@ This workflow is designed to work at any step in the process. In case of bug you
 **/!\ The input required will vary strongly based on which steps of the workflow you want to perform.**
 Several files are **compulsory** 
 
-All input data, including full path to input files, should be provided in the [**config file**](https://github.com/QuentinRougemont/EASYstrata/blob/main/config/config)
+Again, all input data, including full path to input files, should be provided in the [**config file**](https://github.com/QuentinRougemont/EASYstrata/blob/main/config/config)
 
 ### Basic input (all options)
 * **Input genome(s)** - compulsory: This may be one genome assembly containing both sex/mating type chromosomes, or **ideally** two separate haplotype assemblies containing each one of the sex/mating-type chromosomes.
