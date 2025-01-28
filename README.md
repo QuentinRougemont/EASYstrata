@@ -1,9 +1,6 @@
 # genome annotation - Synteny - Ds computation - changepoint analysis - whole genome alignments 
 ====================================================================================
 
-# TO DO: 
-	fill this readme 
-
 # Requirements
 
 This software is suitable only in linux-like systems  (Unfortunately not Windows or MAC) 
@@ -115,24 +112,25 @@ To do so, run :
 
 this will:
 
-*     Perform TE annotation using **repeatmodeller** (de-novo prediction) and **repeatMasker**
-*     Perform gene prediction on the softmasked genome using **BRAKER** (with or without RNAseq). 
-*     Evaluate the quality of the gene prediction (mainly using **BUSCO**)
-*     Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny. This includes the inference of single copy orthologs by **orthofinder**
-*     Run **minimap** between genes to infer gene synteny
+*    Perform TE annotation using **repeatmodeller** (de-novo prediction) and **repeatMasker** 
+*    Perform gene prediction on the softmasked genome using **BRAKER** (with or without RNAseq). 
+*    Evaluate the quality of the gene prediction (mainly using **BUSCO**)
+*    Run **GeneSpace** between your genomes (and eventual ancestral genome) to infer broad pattern of synteny. This includes the inference of single copy orthologs by **orthofinder**
+*    Run **minimap** between genes to infer gene synteny
 *    Run **paml** to estimate synonymous divergence (d<sub>S</sub>) between the sequences/regions of interest
-*    Perform various plots: 
-    *         circos plot,
-    *         dS along the genome, 
-    *         ideogram, 
-    *         etc. (example plots are given below) 
-*    Infer the most likely number of evolutionary strata using a changepoint analysis and produce plots with the results: 
-    *         estimates most likely number of strata (model weight)  ,
-    *         use Bayes-Factors to assess differences among strata ,
-    *         plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots
-    *         plot circos colored based on numbers of strata
-    *         plot ideogram colored based on numbers of strata 
-    *         plot strata numbers along the genome and along ancestral order
+*   Perform various plots: 
+    *   circos plot,
+    *   d<sub>S<sub> along the genome, 
+    *   ideogram, 
+    *   etc. (example plots are given below) 
+*    Infer the most likely number of evolutionary strata using a changepoint analysis: 
+    *   estimates most likely number of strata (model weight)  ,
+    *   use Bayes-Factors to assess differences among strata ,
+    *   plot changepoint location and uncertainty, convergence of the MCMC, other diagnostic plots,
+    *   plot circos colored based on numbers of strata,
+    *   plot ideogram colored based on numbers of strata,  
+    *   plot strata numbers along the genome and along ancestral order.
+
 
 The following options allow you to run only certain parts of the workflow.
 
