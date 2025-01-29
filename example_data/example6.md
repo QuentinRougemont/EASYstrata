@@ -29,7 +29,7 @@ intermediary file are also provided and include mainly the d<sub>S</sub> files
 obtaining the data:
 
 ```sh
-wget /path/to/zenodo/.....
+wget wget https://zenodo.org/records/XXXXXXXX/files/data.tar.gz?download=1
 
 tar zxvf data.tar.gz
 
@@ -46,9 +46,9 @@ the following config file is used:
 
 | option in config | description |
 | --- | --- |
-| *genome1* | ="/path/to/EASYstrata/data/Mcal1250A1.fa" |
+| *genome1* | ="/path2/to/EASYstrata/data/Mcal1250A1.fa" |
 | *haplotype1* | ="Mcal1250A1" |
-| \[*genome2*\] | ="/path/to/EASYstrata/Mcal1250A2.fa" |
+| \[*genome2*\] | ="/path2/to/EASYstrata/Mcal1250A2.fa" |
 | \[*haplotype2*\] | ="Mcal1250A2" |
 | annotate | ="NO" |
 | *RelatedProt* | ="" |
@@ -69,7 +69,7 @@ the following config file is used:
 | *scaffolds* | ="path1/example_data/scaffold.txt" |
 
 
-click [here](example_data/example6.config) to see the file 
+click [here](example6.config) to see the file 
 
 copy the file in the config folder:
 
@@ -90,6 +90,7 @@ to that aim we will run the option 3:
 ./master.sh -o3 2>&1 |tee log
 ```
 
+this should provide the GeneSpace results and all other important results in `02_results` folder  
 
 
 # 5 - refining strata with priors : 

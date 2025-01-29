@@ -45,6 +45,8 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
 
 # TO DO: 
 
+finish providing example  
+correct typo in script 11
 provide installation with docker/singularity ?
 
 
