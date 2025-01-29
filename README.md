@@ -27,6 +27,7 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
         * [3: no RNAseq nor ancestral genome](#3-no-rnaseq-nor-ancestral-genome) 
         * [4:  already annotated genome](#4-already-annotated-genome)
         * [5: other use cases](#5-other-use-case)
+        * [6: changepoint with priors](#-changepoint-with-priors)
 
 
 # Purpose:
@@ -35,11 +36,16 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
 
 [II - Identify synteny blocks and rearragements](#II---Identify-synteny-blocks-and-rearragements)
 
-[III - Plot dS along the genome](#III---Plot-dS-along-the-genome)
+[III - Plot d<sub>S</sub> along the genome](#III---Plot-dS-along-the-genome)
 
 [IV - Perform changepoint analysis to identify evolutionary strata](#IV---Perform-changepoint-analysis-to-identify-evolutionary-strata)
 
 <img src="https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig1.png" width = "490" heigth = "490">
+
+
+# TO DO: 
+
+provide installation with docker/singularity ?
 
 
 Installation: 
@@ -422,7 +428,10 @@ will enable to infer gene order for dS interpretation
 
 ### 4a. Minimizer alignment and plots of target region
 
-Corresponding script: `00_scripts/11_run_genesSpace_paml_ideogram.sh`
+Corresponding script: 
+```sh
+00_scripts/11_run_genesSpace_paml_ideogram.sh
+```
 
 - Alignment between the two haplotypes using **minimap2**
 
@@ -462,12 +471,16 @@ For more information, consult the [GeneSpace readme](https://github.com/jtlovell
 
 **Figure 4:** A) Synteny plot from GeneSpace showing gene synteny between ancestral species (ancestral_sp) and the two mating type of *Microbotryum lychnidis dioiciae 1064*  and B) Circos plot between the ancestral species and mating type A1 (left part) and cicros plot between mating type A1 and mating tpye A2. External links show the position of some major gene (red, green and light blue single link as well as the centromeres in violet). External density plot in lightblue display the gene density, the green density plot displays TE density. Red and darkblue interior links display single copy orthologs links.
 
-### Note1: the same figure will be constructed automatically with inner links colored according to discrete quantile values of dS as can seen here [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig12.png).  Usefull for biological interpretation
+#### Note1: the same figure will be constructed automatically with inner links colored according to discrete quantile values of dS as can seen [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Figure12.svg).  (Usefull for biological interpretation)
  
-### Note2: the same figure can be constructed automatically with outer links colored according to the strata infered after the MCP analysis as can be seen [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig11.png).  Usefull for biological interpretation
+#### Note2: the same figure will be constructed automatically with outer links colored according to the strata infered after the MCP analysis as can be seen [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Figure11.svg).  (Usefull for biological interpretation)
  
+#### Note3: in addition to large scale synteny, micro-synteny (i.e. gene colinearity) will be plotted using the R package Rideogram: 
 
-Strata can be displayed as colored external links can on the circos :
+```R
+00_scripts/Rscripts/04.ideogram.R [opts]
+```  
+this will plot colored and uncolored ideogram based on dS values and strata, see examples [below](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig10.png)
 
 
 
@@ -498,10 +511,14 @@ Align all coding sequences from the focal scaffolds.
 
 PAML fail if special characters occur in the input fasta file, or **if the length of a gene name is above 32 characters.** 
 To prevent this, we implemented an automatic renaming procedure to shorten character names and remove special characters.  This should be transparent to the users however since gene are then converted back to their original name.
-- Plotting dS values using a custom R script:   
+- Plotting d<sub>S</sub> values using a custom R script:   
     
 
-Corresponding script: `00_scripts/Rscripts/03_plot_paml.R`  
+Corresponding script: 
+
+```R
+00_scripts/Rscripts/03_plot_paml.R
+```  
 
 d<sub>S</sub> values are plotted along the focal scaffolds, and, if 2 haplotypes were given as input, along the whole genome.  
 The gene order will be that of the genome used as proxy for the ancestral state: either one of the two sex/mating type chromosomes, or an outgroup (see option *ancestral*).  
@@ -510,14 +527,17 @@ It is possible to modify the R script to adapt the plotting options to your need
 
 ![Fig5.png](https://github.com/QuentinRougemont/EASYstrata/blob/main/.pictures/Fig5.png)
 
-**Figure 5:** Ds plot and arrangements. A) d<sub>S</sub> values along the ancestral chromosomes. B) d<sub>S</sub> values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
+**Figure 5:** d<sub>S</sub> plot and arrangements. A) d<sub>S</sub> values along the ancestral chromosomes. B) d<sub>S</sub> values along the ancestral gene order after returning the chromosomes and removing the large autosomal part on contig 8.
 C) and D) arrangement as infered based on gene rank in mating type A1 and A2 respectively. 
 
 
 
 ### === - Plot circos (==step III==)
 
-Corresponding script: `00_scripts/Rscripts/05_plot_circos.R [options]`  
+Corresponding script:  
+```R
+00_scripts/Rscripts/05_plot_circos.R [options] 
+```
 
 Construction of a circos plot of the focal scaffolds, tracing links between their single copy ortholog genes, using **circlize**.  
 * If TE info are available these can also be provided as arguments.
@@ -715,6 +735,11 @@ now if you have a gtf and and genome assembly (either from running this pipeline
 ## 5: other use cases 
 
 describe here all possibles combinations 
+
+## 6: changepoint with priors
+
+- [see example 6](example_data/example6.md)
+
 
 # --------------------------------------------------------------------------
 
