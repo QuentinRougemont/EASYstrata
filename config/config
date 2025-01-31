@@ -36,6 +36,10 @@ bamlist2="/full/path/to/bam.aligned_on_genome2.txt" #list of bam on genome2
 #---- COMPULSORY INFOS ------
 #TE INFO:
 annotateTE="" #YES/NO
+removeTE="YES" #YES/NO wether gene covered by TE should be removed 
+#note: I used a proportion for filtering these TE-related gene, and only remove those covered at more than 99% for now)
+#this filtering approach could be relaxed - set as a parameter here (e.g.
+#prop=0.9999 #0.5, 0.6, 0.7, 0.8, 0.9)
 TEdatabase="" #a full path to a custom database of species/genus species TE (not needed if genome already softmasked)
 #NCBI species for de-novo TE:
 ncbi_species=""

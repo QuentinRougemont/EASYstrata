@@ -165,9 +165,22 @@ awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER3"/"$database".fa.masked.masked.out 
 #awk '$0~/^>/{if(NR>1){print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' "$database"-families.fa |\
 #    grep -A1 Unknown |sed '/^--$/d' > unknown.fa
 
-cat Round*bed >> ../raw."$database".TE.bed
-#make overly simplistic bed: 
-grep -v "Simple\|Low" ../raw."$database".TE.bed > ../03_genome/"$base".TE.bed
+cat Round*bed >> ../03_genome/raw."$database".TE.bed
+#make overly simplistic filtered bed: 
+grep -v "Simple\|Low\Unsp" ../raw."$database".TE.bed > ../03_genome/filtered."$base".TE.bed
+
+if [[ $rm_unknown = "YES" ]]
+then
+   bedtools maskfasta -soft \
+    -fi "$genome"  \
+    -bed ../filtered."$database".TE.bed \
+    -fo ../03_genome/genome.wholemask.fa
+else
+   bedtools maskfasta -soft \
+    -fi "$genome"  \
+    -bed ../raw."$database".TE.bed \
+    -fo ../03_genome/genome.wholemask.fa
+fi
 
 #RepeatMasker -pa 18 -e ncbi -lib unknown.fa  -dir "$FOLDER4" "$FOLDER3"/"$base".masked.masked.masked 2>&1 | \
 #    tee ../$LOG_FOLDER/F4_repeatmasker_"$base"."$TIME".log  ||\
@@ -182,13 +195,6 @@ grep -v "Simple\|Low" ../raw."$database".TE.bed > ../03_genome/"$base".TE.bed
 #awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER4"/"$database".fa.masked.masked.masked.out |sed '1,3d' > Round4.bed
 #
 
-cd ../03_genome || exit
-
-if [[ $rm_unknown = "YES" ]]
-then
-    ln -s ../05_TE/"$FOLDER3"/"$base".masked.masked.masked genome.wholemask.fa
-else
-    ln -s ../05_TE/"$FOLDER3"/"$base".masked.masked.masked genome.wholemask.fa
-fi
+#cd ../03_genome || exit
 
 

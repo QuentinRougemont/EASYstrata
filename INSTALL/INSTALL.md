@@ -500,3 +500,18 @@ then
 fi
 ```
 
+## bedtools :
+
+```
+command='bedtools'
+if ! command -v $command &> /dev/null
+then
+    #direct install: 
+    wget https://github.com/arq5x/bedtools2/releases/download/v2.31.0/bedtools.static
+    mv bedtools.static bedtools
+    chmod a+x bedtools
+    path=$(pwd)
+    echo -e "\n#Path to bedtools  export PATH=\$PATH:$path" >> ~/.bashrc
+    source ~/.bashrc  
+fi
+```

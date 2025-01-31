@@ -410,3 +410,59 @@ then
     echo "please check your data "
     exit 1
 fi
+
+
+# a bit more filtering of TE - identify entierely softmasked genes and remove them:
+# bedtools could be used to extract all overlapping TE in the bed 
+# but we may want to filter based on proportion of TE
+# so I do that myself: 
+
+#linearize latest files first:
+awk '$0~/^>/{if(NR>1){
+    print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        "$haplo".spliced_cds.fa > "$haplo".spliced_cds.lin.fasta
+inputcds="$haplo".spliced_cds.lin.fasta
+sed -i 's/ CDS=[0-9-].*$//' $inputcds 
+
+awk '$0~/^>/{if(NR>1){
+    print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+        "$haplo"_prot.final.fa > "$haplo"_prot.final.lin.fasta
+inputprot="$haplo"_prot.final.lin.fasta
+
+ awk '{
+       if(NR%2==1)
+          {printf(">%s\t",substr($0,2));}
+       else if(NR%2==0) print length "\t" gsub(/[actg]/, "") }' "$inputcds" \
+       |awk '{print $0"\t"$3/$2}' > propTE.in.genes
+
+
+mkdir TE
+#get ID of genes with: 100%TE, 90%, 80%, 70%,60%
+for prop in 0.5 0.6 0.7 0.75 0.8 0.9 0.9999 ; 
+do
+    awk -v prop=$prop '$4>prop {gsub(/.t[0-9]/,"");gsub(">",""); print $1}' propTE.in.genes  > gene"$prop"percent_inTE ; 
+    awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$inputcds" \
+        |grep -w -v -Ff gene"$prop"percent_inTE - | tr "\t" "\n" > TE/"$haplo".cds.TE"$prop".fa
+    awk '{ if ((NR>1)&&($0~/^>/)) { printf("\n%s", $0); } else if (NR==1) { printf("%s", $0); } else { printf("\t%s", $0); } }' "$inputprot" \
+        |grep -w -v -Ff gene"$prop"percent_inTE - | tr "\t" "\n" > TE/"$haplo".prot.TE"$prop".fa
+    #same as above -shorter but slower: awk -vRS=">" -vORS="\n" -vFS="\n" -vOFS="\t" 'NR>1 {$1=$1; print ">"$0}' 
+
+    #filtering the GTF as well:
+    grep -w -v -Ff gene"$prop"percent_inTE "$gtf4" > TE/"${gtf4%.final.gtf}".TE"$prop".gtf  
+done
+
+#then we can finally chose to use either those versions or the raw unfiltered version
+#we define a new argument in the config file
+if [[ $removeTE = "YES" ]]
+then
+    #let's assume we are not too stringeant 
+    #this will be passed as a parameter later to be chosen by the user
+    prop=0.9999 #see config file 
+    #copy the final one :
+    cp "$haplo"_prot.final.clean.fa unfiltered."$haplo"_prot.final.clean.fa
+    cp "$haplo"_prot.final.fa       unfiltered."$haplo"_prot.final.fa
+    cp "$haplo".spliced_cds.fa      unfiltered."$haplo".spliced_cds.fa 
+    cp "$gtf4"                      unfiltered."$gtf4" 
+    cp  TE/"${gtf4%.final.gtf}".TE"$prop".gtf  "$gtf4"
+ fi 
+ #if removeTE is unset we work on the raw unprocessed data
