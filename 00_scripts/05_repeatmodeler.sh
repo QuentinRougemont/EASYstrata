@@ -167,18 +167,18 @@ awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER3"/"$database".fa.masked.masked.out 
 
 cat Round*bed >> ../03_genome/raw."$database".TE.bed
 #make overly simplistic filtered bed: 
-grep -v "Simple\|Low\Unsp" ../raw."$database".TE.bed > ../03_genome/filtered."$base".TE.bed
+grep -v "Simple\|Low\|Unsp" ../raw."$database".TE.bed > ../03_genome/filtered."$database".TE.bed
 
 if [[ $rm_unknown = "YES" ]]
 then
    bedtools maskfasta -soft \
     -fi "$genome"  \
-    -bed ../filtered."$database".TE.bed \
+    -bed ../03_genome/filtered."$database".TE.bed \
     -fo ../03_genome/genome.wholemask.fa
 else
    bedtools maskfasta -soft \
     -fi "$genome"  \
-    -bed ../raw."$database".TE.bed \
+    -bed ../03_genome/raw."$database".TE.bed \
     -fo ../03_genome/genome.wholemask.fa
 fi
 
