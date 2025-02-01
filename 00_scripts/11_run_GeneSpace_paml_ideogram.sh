@@ -675,9 +675,9 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
     echo -e "\n~~~~~~~~~~~~~~~\n\tcontstructing circos plots\n ~~~~~~~~~~~~~~~~~~~"
 
     #check if a TEfile exist for genome1 and genome2:
-    if [ -s haplo1/03_genome/"$haplo1".TE.bed ] ;
+    if [ -s haplo1/03_genome/filtered."$haplo1".TE.bed ] ;
     then 
-        genome1TE="haplo1/03_genome/"$haplo1".TE.bed"
+        genome1TE="haplo1/03_genome/filtered.$haplo1.TE.bed"
         annotateTE="YES" 
     elif [ -n "$TEgenome1" ] ;
     then 
@@ -687,9 +687,9 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
         annotateTE="NO"
     fi
     
-    if [ -s haplo2/03_genome/"$haplo2".TE.bed ] ;
+    if [ -s haplo2/03_genome/filtered."$haplo2".TE.bed ] ;
     then 
-        genome2TE="haplo2/03_genome/"$haplo2".TE.bed"
+        genome2TE="haplo2/03_genome/filtered.$haplo2.TE.bed"
         annotateTE="YES" 
     elif [ -n "$TEgenome2" ] ;
     then 
@@ -1140,16 +1140,16 @@ cat 02_results/bed/"$haplo1".7strata.bed 02_results/bed/"$haplo2".7strata.bed> 0
 cat 02_results/bed/"$haplo1".8strata.bed 02_results/bed/"$haplo2".8strata.bed> 02_results/bed/"$haplo1"."$haplo2".8strata.bed
 cat 02_results/bed/"$haplo1".9strata.bed 02_results/bed/"$haplo2".9strata.bed> 02_results/bed/"$haplo1"."$haplo2".9strata.bed
 
-echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "\n\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo -e "~ \tcreating circos colored by strata\t ~"
-echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
 
 
-if [ -n "${ancestral_genome}" ] ; then
-    echo ancestral genome provided 
-    for links in 02_results/bed/ancestralspecies$haplo1.*.strata.bed ; do
+if [ -n "${ancestral_genome}" ] ; then
+    echo -e "\n ancestral genome provided \n"
+    for links in 02_results/bed/ancestralspecies"$haplo1".*.strata.bed ; do
         if [ -n "${annotateTE}" ] ; then
-            echo TE bed provided
+            echo -e "\nTE bed provided\n"
             Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
                -c "$chromosomes" \
                -y 02_results/synteny_ancestral_sp_"$haplo1".txt \
@@ -1161,7 +1161,7 @@ if [ -n "${ancestral_genome}" ] ; then
                -u "$genome2TE" \
                -l "$links"
         else 
-            echo assuming noTE
+            echo -e "\nassuming noTE\n"
             Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$ancestral" -p "$haplo1" \
                -c "$chromosomes" \
                -y 02_results/synteny_ancestral_sp_"$haplo1".txt \
@@ -1175,12 +1175,13 @@ if [ -n "${ancestral_genome}" ] ; then
         fi
     done
 else
-    echo no ancestral genome provided 
+    echo -e "\nno ancestral genome provided\n"
 fi
 #performing haplo1 vs haplo2 comparisons :
 for links in 02_results/bed/"$haplo1"."$haplo2".*strata.bed ; do
     if [ -n "${annotateTE}" ] ; then
-        echo TE bed provided
+        echo -e "\nTE bed provided\n"
+        echo -e "\runngin circos with links file $links\n\n"
         Rscript 00_scripts/Rscripts/05_plot_circos.R -s "$haplo1" -p "$haplo2" \
            -c "$chromosomes" \
            -y 02_results/synteny_"$haplo1"_"$haplo2".txt \
@@ -1207,15 +1208,15 @@ for links in 02_results/bed/"$haplo1"."$haplo2".*strata.bed ; do
 done
 
 #now we will do the same discretisation of dS for plotting in ideogram: 
-echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 echo -e "~ \tcreating ideogram colored by dS values\t ~"
-echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+echo -e "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
 
 
 if [  -n "${ancestral_genome}" ] ; then
-    echo -e "ancestral genome was provided for inference" 
+    echo -e "\nancestral genome was provided for inference\n" 
     if [ -n "$scafforientation" ] ; then
-        echo -e "particular orientation will be used"
+        echo -e "\nparticular orientation will be used\n"
         #we will make an ideogram with it 
         if ! Rscript ./00_scripts/Rscripts/04.ideogram.R \
                 -c 02_results/sco_anc \

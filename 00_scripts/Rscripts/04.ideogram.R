@@ -161,7 +161,7 @@ if(!is.null(opt$links)) {
 #	indexB <- argv[5] #full path to index file for sp2
 
 #    link <- argv[6] 
-     link <- opt$links[6] 
+     link <- opt$links 
 
     baselink <-basename(link)
 	links <- read.table(link, stringsAsFactors = T) %>%
