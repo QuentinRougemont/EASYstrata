@@ -360,7 +360,7 @@ echo -e "\n-----------------------------------------------------------------"
 echo "re-extracting protein and CDS from the final non-redundan gtf" 
 echo -e "-----------------------------------------------------------------\n"
 
-gffread -w "$haplo".spliced_cds.fa -g ../"${genome}" "$gtf4" 
+gffread -w "$haplo".spliced_cds.fa -g ../03_genome/genome.wholemask.fa "$gtf4" 
 echo "translate CDS into amino acid "
 transeq -sequence "$haplo".spliced_cds.fa \
     -outseq "$haplo"_prot.final.fa
