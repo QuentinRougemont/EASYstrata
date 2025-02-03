@@ -172,12 +172,12 @@ grep -v "Simple\|Low\|Unsp" ../raw."$database".TE.bed > ../03_genome/filtered."$
 if [[ $rm_unknown = "YES" ]]
 then
    bedtools maskfasta -soft \
-    -fi "$genome"  \
+    -fi ../"$genome"  \
     -bed ../03_genome/filtered."$database".TE.bed \
     -fo ../03_genome/genome.wholemask.fa
 else
    bedtools maskfasta -soft \
-    -fi "$genome"  \
+    -fi ../"$genome"  \
     -bed ../03_genome/raw."$database".TE.bed \
     -fo ../03_genome/genome.wholemask.fa
 fi
