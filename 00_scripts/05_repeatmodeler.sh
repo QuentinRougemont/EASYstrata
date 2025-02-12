@@ -167,7 +167,7 @@ awk '{print $5"\t"$6"\t"$7"\t"$11}' "$FOLDER3"/"$database".fa.masked.masked.out 
 
 cat Round*bed >> ../03_genome/raw."$database".TE.bed
 #make overly simplistic filtered bed: 
-grep -v "Simple\|Low\|Unsp" ../raw."$database".TE.bed > ../03_genome/filtered."$database".TE.bed
+grep -v "Simple\|Low\|Unsp" ../03_genome/raw."$database".TE.bed > ../03_genome/filtered."$database".TE.bed
 
 if [[ $rm_unknown = "YES" ]]
 then

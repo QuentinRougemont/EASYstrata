@@ -464,5 +464,7 @@ then
     cp "$haplo".spliced_cds.fa      unfiltered."$haplo".spliced_cds.fa 
     cp "$gtf4"                      unfiltered."$gtf4" 
     cp  TE/"${gtf4%.final.gtf}".TE"$prop".gtf  "$gtf4"
+    cp  TE/"$haplo".prot.TE"$prop".fa "$haplo"_prot.clean.fa
+    cp  TE/"$haplo".cds.TE"$prop".fa "$haplo".spliced_cds.fa
  fi 
  #if removeTE is unset we work on the raw unprocessed data
