@@ -9,7 +9,7 @@ channels:
 dependencies:
   - python=3.12.8
   - wget=1.21.4
-  - curl=8.10.0
+  - curl=8.10.1
   - numpy=1.26.4
   - biopython=1.83
   - make=4.3
