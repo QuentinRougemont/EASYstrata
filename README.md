@@ -26,7 +26,7 @@ This software is suitable only in linux-like systems  (Unfortunately not Windows
         * [2: already mapped RNAseq and ancestral genome](#2-already-mapped-RNAseq-and-ancestral-genome) 
         * [3: no RNAseq nor ancestral genome](#3-no-rnaseq-nor-ancestral-genome) 
         * [4:  already annotated genome](#4-already-annotated-genome)
-        * [5: other use cases](#5-other-use-case)
+        * [5: other use cases](#5-other-use-cases)
         * [6: changepoint with priors](#-changepoint-with-priors)
 
 

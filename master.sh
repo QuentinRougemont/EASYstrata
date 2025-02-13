@@ -239,6 +239,12 @@ then
     rnaseq="NO"
 fi
 
+#test if RNAseq info are provided or not:
+if [ -z "${fungus}" ] 
+then 
+    fungus="NO"
+fi
+
 if [[ $interpro = "YES" ]]
 then
     echo "attempting to download and install inter-pro - this will take some time" 
@@ -291,7 +297,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -322,7 +328,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -398,7 +404,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -438,7 +444,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -495,8 +501,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
-                -b YES \
+                -f "$fungus" \
                 -b "$bamlist1" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -527,7 +532,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist2" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -584,7 +589,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -614,7 +619,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -674,7 +679,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist1"  2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -705,7 +710,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist2" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -786,7 +791,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 \
+                -f "$fungus" 2>&1 \
                 | tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -827,7 +832,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -890,7 +895,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -915,11 +920,16 @@ if [ "$option" == 1 ]; then
         #we will remove them from $haplotype1 to create a separate dataset for genespace etc:
         mkdir -p haplo2/03_genome
 
-        #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        #linearise genome of haplo1  and extract scaffold to study:       
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1027,7 +1037,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1054,10 +1064,16 @@ if [ "$option" == 1 ]; then
         mkdir -p haplo2/03_genome
 
         #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
+
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1147,7 +1163,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b YES \
                 -b "$bamlist1" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
@@ -1175,10 +1191,16 @@ if [ "$option" == 1 ]; then
         mkdir -p haplo2/03_genome
 
         #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
+
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1268,7 +1290,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1294,10 +1316,16 @@ if [ "$option" == 1 ]; then
         mkdir -p haplo2/03_genome
 
         #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
+
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1392,7 +1420,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist1"  2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -1421,10 +1449,16 @@ if [ "$option" == 1 ]; then
         mkdir -p haplo2/03_genome
 
         #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
+
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1538,7 +1572,7 @@ if [ "$option" == 1 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 \
+                -f "$fungus" 2>&1 \
                 | tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1566,10 +1600,16 @@ if [ "$option" == 1 ]; then
         mkdir -p haplo2/03_genome
 
         #linearise genome of haplo1  and extract scaffold to study:
-        awk '$0~/^>/{if(NR>1){
-        print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
-          haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
-        
+        if [ -s "haplo1/03_genome/genome.wholemask.fa" ] ; then
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/genome.wholemask.fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        else 
+            awk '$0~/^>/{if(NR>1){
+            print sequence;sequence=""}print $0}$0!~/^>/{sequence=sequence""$0}END{print sequence}' \
+            haplo1/03_genome/"$haplotype1".fa | grep -A1 "$haplotype2" > haplo2/03_genome/"$haplotype2".fa
+        fi
+
         #extract the gene from the gff :
         mkdir -p haplo2/08_best_run
         grep "$haplotype2" haplo1/08_best_run/"$haplotype1".final.gtf > haplo2/08_best_run/"$haplotype2".final.gtf
@@ -1680,7 +1720,7 @@ then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
                 cd ../
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -1709,7 +1749,7 @@ then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1787,7 +1827,7 @@ then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1829,7 +1869,7 @@ then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -1888,8 +1928,7 @@ then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
-                -b YES \
+                -f "$fungus" \
                 -b "$bamlist1" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -1920,7 +1959,7 @@ then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist2" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -1978,7 +2017,7 @@ then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2008,7 +2047,7 @@ then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2068,7 +2107,7 @@ then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist1"  2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -2098,7 +2137,7 @@ then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist2" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -2179,7 +2218,7 @@ then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2220,7 +2259,7 @@ then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2516,7 +2555,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2549,7 +2588,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype1" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2583,7 +2622,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2615,7 +2654,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype2" \
                 -r NO \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2673,7 +2712,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap1
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2708,7 +2747,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype1" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist1" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
@@ -2769,7 +2808,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES 2>&1 |\
+                -f "$fungus" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
             then
@@ -2804,7 +2843,7 @@ if [ "$option" = 6 ]; then
                 -s "$haplotype2" \
                 -r YES \
                 -m YES \
-                -f YES \
+                -f "$fungus" \
                 -b "$bamlist2" 2>&1 |\
                 tee ../LOGS/log_step05_08_hap2
             if [[  "${PIPESTATUS[0]}" -ne 0 ]]
