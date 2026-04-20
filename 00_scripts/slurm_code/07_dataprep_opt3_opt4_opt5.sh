@@ -142,7 +142,7 @@ source config/cpu_mem
             exit
         else
             gffread -g "$genome1" -y haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa "$gtf1"
-            sed -i '/^>/!s/./*/g' haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa 
+            sed -i '/^>/!s/\./*/g' haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa 
             #transeq -sequence haplo1/08_best_run/"$haplotype1".spliced_cds.fa \
             #        -outseq haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 
@@ -218,4 +218,3 @@ source config/cpu_mem
              grep -v "$haplotype1" "$TEgenome1" > haplo1/03_genome/filtered."$haplotype1".TE.bed 
          fi
     fi
-

@@ -7,6 +7,137 @@ source config/colors
 source ./config/config 
 
 ############################################################
+# Input validation helpers                                 #
+############################################################
+
+validation_error()
+{
+    echo -e "\n${RED}INPUT VALIDATION ERROR:${NC} $1\n" >&2
+    exit 1
+}
+
+validate_simple_id()
+{
+    local label="$1"
+    local value="$2"
+
+    if [ -z "$value" ] ; then
+        return 0
+    fi
+
+    if [[ ! "$value" =~ ^[A-Za-z0-9_]+$ ]] ; then
+        validation_error "$label '$value' contains unsupported characters.
+Allowed characters are letters, numbers and underscore only."
+    fi
+}
+
+validate_fasta_headers()
+{
+    local fasta="$1"
+    local expected_prefix="$2"
+    local label="$3"
+
+    if [ ! -s "$fasta" ] ; then
+        validation_error "$label FASTA '$fasta' is missing or empty."
+    fi
+
+    awk -v prefix="$expected_prefix" -v file="$fasta" '
+        BEGIN {
+            count = 0
+            bad = 0
+        }
+        /^>/ {
+            id = substr($1, 2)
+            full = substr($0, 2)
+
+            if (full != id) {
+                printf("%s: header contains whitespace or extra metadata: %s\n", file, $0) > "/dev/stderr"
+                bad = 1
+            }
+            if (id !~ /^[A-Za-z0-9_]+$/) {
+                printf("%s: header contains unsupported characters: %s\n", file, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (id ~ /_1/) {
+                printf("%s: header contains forbidden substring _1: %s\n", file, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (prefix != "" && id !~ ("^" prefix "_[A-Za-z0-9]+$")) {
+                printf("%s: header must follow [%s]_[chromosome] with no extra underscores: %s\n", file, prefix, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (prefix == "" && split(id, parts, "_") != 2) {
+                printf("%s: header must follow [individual]_[chromosome]: %s\n", file, id) > "/dev/stderr"
+                bad = 1
+            }
+            count++
+        }
+        END {
+            if (count == 0) {
+                printf("%s: no FASTA headers were found.\n", file) > "/dev/stderr"
+                bad = 1
+            }
+            exit bad
+        }
+    ' "$fasta" || validation_error "invalid FASTA headers detected in $label ('$fasta').
+See README.md > Input data > WARNINGS for the required naming rules."
+}
+
+validate_gtf_gene_ids()
+{
+    local gtf="$1"
+    local expected_prefix="$2"
+    local label="$3"
+
+    if [ ! -s "$gtf" ] ; then
+        validation_error "$label annotation '$gtf' is missing or empty."
+    fi
+
+    awk -v prefix="$expected_prefix" -v file="$gtf" '
+        BEGIN {
+            count = 0
+            bad = 0
+        }
+        $0 !~ /^#/ && ($3 == "gene" || $3 == "transcript" || $3 == "mRNA") {
+            id = ""
+            if (match($0, /gene_id "[^"]+"/)) {
+                id = substr($0, RSTART + 9, RLENGTH - 10)
+            }
+            else {
+                printf("%s: missing gene_id at line %d\n", file, NR) > "/dev/stderr"
+                bad = 1
+                next
+            }
+            if (id !~ /^[A-Za-z0-9_]+$/) {
+                printf("%s: gene_id contains unsupported characters at line %d: %s\n", file, NR, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (id ~ /_1/) {
+                printf("%s: gene_id contains forbidden substring _1 at line %d: %s\n", file, NR, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (prefix != "" && id !~ ("^" prefix "_[A-Za-z0-9]+_[A-Za-z0-9]+$")) {
+                printf("%s: gene_id must follow [%s]_[chromosome]_[gene] with no extra underscores at line %d: %s\n", file, prefix, NR, id) > "/dev/stderr"
+                bad = 1
+            }
+            if (prefix == "" && split(id, parts, "_") != 3) {
+                printf("%s: gene_id must follow [individual]_[chromosome]_[gene] at line %d: %s\n", file, NR, id) > "/dev/stderr"
+                bad = 1
+            }
+            count++
+        }
+        END {
+            if (count == 0) {
+                printf("%s: no gene/transcript records with gene_id were found.\n", file) > "/dev/stderr"
+                bad = 1
+            }
+            exit bad
+        }
+    ' "$gtf" || validation_error "invalid gene_id format detected in $label ('$gtf').
+See README.md > Input data > WARNINGS for the required naming rules."
+}
+
+############################################################
 # Help                                                     #
 ############################################################
 Help()
@@ -87,13 +218,19 @@ then
     Help
     exit 2
 else 
+    if [ -n "${haplotype1}" ] ; then
+        validate_simple_id "haplotype1" "${haplotype1}"
+    fi
+    if [ -n "${haplotype2}" ] ; then
+        validate_simple_id "haplotype2" "${haplotype2}"
+    fi
+
     if [ -n "${genome1}" ] ; 
     then
         b1=$(basename "${genome1%.fa*}" )
-        if [[ "$b1" =~ [^a-zA-Z0-9.] ]] ; 
+        if [[ "$b1" =~ [^a-zA-Z0-9._-] ]] ; 
         then 
-            echo "error only alphanumeric character allowed in genomeIDs" 
-            echo "see readme.md on github"
+            validation_error "genome1 file basename '$b1' contains unsupported characters."
         else 
             echo "genome 1 is $genome1" 
         fi
@@ -101,10 +238,9 @@ else
     if [ -n "${genome2}" ] ;
     then
         b1=$(basename "${genome2%.fa*}" )
-        if [[ "$b1" =~ [^a-zA-Z0-9.] ]] ; 
+        if [[ "$b1" =~ [^a-zA-Z0-9._-] ]] ; 
         then 
-            echo "error only alphanumeric character allowed in genomeIDs" 
-            echo "see readme.md on github"
+            validation_error "genome2 file basename '$b1' contains unsupported characters."
         else 
             echo "genome 2 is $genome2" 
         fi
@@ -184,6 +320,8 @@ if [[ -z "${haplotype1}" ]] ; then
     haplotype1="$(basename "${genome1%.fa**}")"
 fi
 
+validate_simple_id "haplotype1" "${haplotype1}"
+
 # ----- check compression of fasta  ------ ##
 
 #eval "$(conda shell.bash hook)"
@@ -207,6 +345,12 @@ else
    cd ../../
 fi
 
+if [ -n "${genome2}" ] ; then
+    validate_fasta_headers "haplo1/03_genome/${haplotype1}.fa" "${haplotype1}" "genome1"
+else
+    validate_fasta_headers "haplo1/03_genome/${haplotype1}.fa" "" "genome1"
+fi
+
 #--- handling genome 2 -----
 if [[ -n "$genome2" ]] ; then
     
@@ -217,6 +361,8 @@ if [[ -n "$genome2" ]] ; then
         haplotype2="$(basename "${genome2%.fa**}")"
         mkdir -p haplo2/03_genome ; 
     fi
+
+    validate_simple_id "haplotype2" "${haplotype2}"
     
     #check genome compression:
     # ----- check compression of fasta  ------ ##
@@ -238,6 +384,8 @@ if [[ -n "$genome2" ]] ; then
         genome2=$genome2
         cd ../../
     fi
+
+    validate_fasta_headers "haplo2/03_genome/${haplotype2}.fa" "${haplotype2}" "genome2"
 fi
 
 #conda deactivate
@@ -2406,6 +2554,9 @@ if [ "$option" == 3 ] || [ "$option" == 4 ] || [ "$option" == 5 ]; then
             echo " "
         fi
 
+        validate_gtf_gene_ids "$gtf1" "$haplotype1" "gtf1"
+        validate_gtf_gene_ids "$gtf2" "$haplotype2" "gtf2"
+
         cp "$gtf1" haplo1/08_best_run/"${haplotype1}".final.gtf
         cp "$gtf2" haplo2/08_best_run/"${haplotype2}".final.gtf
         cp "$genome1" haplo1/03_genome/"${haplotype1}".fa
@@ -2460,6 +2611,8 @@ if [ "$option" == 3 ] || [ "$option" == 4 ] || [ "$option" == 5 ]; then
             echo " "
         fi
 
+        validate_gtf_gene_ids "$gtf1" "" "gtf1"
+
         cp "$gtf1" haplo1/08_best_run/"${haplotype1}".final.gtf
         cp "$genome1" haplo1/03_genome/"${haplotype1}".fa
 
@@ -2470,7 +2623,7 @@ if [ "$option" == 3 ] || [ "$option" == 4 ] || [ "$option" == 5 ]; then
             exit
         else
             gffread -g "$genome1" -y haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa "$gtf1"
-            sed -i '/^>/!s/./*/g' haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa 
+            sed -i '/^>/!s/\./*/g' haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa 
             #transeq -sequence haplo1/08_best_run/"$haplotype1".spliced_cds.fa \
             #        -outseq haplo1/08_best_run/"$haplotype1"_prot.final.clean.fa
 

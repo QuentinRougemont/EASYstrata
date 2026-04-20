@@ -374,9 +374,11 @@ echo -e "-----------------------------------------------------------------\n"
 gffread -w "$haplo".spliced_cds.fa -g ../03_genome/genome.wholemask.fa "$gtf4" 
 echo "translate CDS into amino acid "
 gffread -y "$haplo"_prot.final.clean.fa -g ../03_genome/genome.wholemask.fa "$gtf4"
+sed -i '/^>/!s/\./*/g' "$haplo"_prot.final.clean.fa
 
 transeq -clean -sequence  "$haplo".spliced_cds.fa \
     -outseq "$haplo"_prot.final.fa
+sed -i '/^>/!s/\./*/g' "$haplo"_prot.final.fa
 #transeq -clean -sequence "$haplo".spliced_cds.fa \
 #    -outseq "$haplo"_prot.final.clean.fa #for interproscan and other pipelines
 

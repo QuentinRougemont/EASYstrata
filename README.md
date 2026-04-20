@@ -129,6 +129,7 @@ Again, all input data, including full path to input files, should be provided in
 all options
 * **Input genome(s)** - compulsory: This may be one genome assembly containing both sex/mating type chromosomes, or **ideally** two separate haplotype assemblies containing each one of the sex/mating-type chromosomes.
 * **list of scaffolds** - compulsory: names of the contigs/scaffolds/chromosomes composing the sex/mating-type chromosomes. see example [here](https://github.com/QuentinRougemont/EASYstrata/blob/main/example_data/scaffold.txt)
+  > :warning: **All entries must belong to haplotype 1 only.** Do not include chromosomes from haplotype 2. The plotting scripts assign all entries to haplotype 1 internally, so mixing both haplotypes will cause an error in `plot_riparian`.
 * **ancestral genome** - optional but highly recommended: The genome assembly of a species used as a proxy for the ancestral state. This will allow to plot d<sub>S</sub> along 'ancestral' gene order, and to infer more accurately single copy orthologs.
 * **ancestral gene prediction** - compulsory with ancestral genome: gene prediction associated with the ancestral genome. format: gtf/gff(.gz) 
 

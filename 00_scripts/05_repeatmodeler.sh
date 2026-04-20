@@ -180,6 +180,8 @@ cat Round*bed >> ../03_genome/raw."$database".TE.bed
 #make overly simplistic filtered bed: 
 grep -v "Simple\|Low\|Unsp" ../03_genome/raw."$database".TE.bed > ../03_genome/filtered."$database".TE.bed
 
+conda activate superannot
+
 if [[ $rm_unknown = "YES" ]]
 then
    bedtools maskfasta -soft \
@@ -207,5 +209,4 @@ fi
 #
 
 #cd ../03_genome || exit
-
 

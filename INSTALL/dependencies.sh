@@ -11,12 +11,39 @@ then
     exit 1
 fi
 
+#option 1: local install
+# SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# EASYSTRATA_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+# PROFILE_PATH="$EASYSTRATA_ROOT/path.sh"
+#option 2: global install
+PROFILE_PATH="$HOME/.bashrc"
+
+touch "$PROFILE_PATH"
+source "$PROFILE_PATH"
+eval "$(mamba shell hook --shell bash)"
+mamba activate superannot
+
+Rscript -e 'if (!requireNamespace("devtools", quietly=TRUE)) install.packages("devtools")' || \
+    { echo -e "ERROR!\ndevtools installation failed\ncheck your R setup\n" ; exit 1 ; }
+
+Rscript -e 'if (!requireNamespace("remotes", quietly=TRUE)) install.packages("remotes")' || \
+    { echo -e "ERROR!\nremotes installation failed\ncheck your R setup\n" ; exit 1 ; }
+
+Rscript -e 'if (!requireNamespace("BiocManager", quietly=TRUE)) install.packages("BiocManager")' || \
+    { echo -e "ERROR!\nBiocManager installation failed\ncheck your R setup\n" ; exit 1 ; }
+
+Rscript -e 'if (!requireNamespace("Biostrings", quietly=TRUE)) BiocManager::install("Biostrings", ask=FALSE, update=FALSE)' || \
+    { echo -e "ERROR!\nBiostrings installation failed\ncheck your R/Bioconductor setup\n" ; exit 1 ; }
+
+Rscript -e 'remotes::install_version("ggplot2", version="3.5.1", upgrade="never")' || \
+    { echo -e "ERROR!\nggplot2 installation failed\ncheck your R setup\n" ; exit 1 ; }
+
 #install GeneSpace first:
 Rscript -e  'devtools::install_github("jtlovell/GENESPACE")' || \
     { echo -e "ERROR!\nGeneSpace installation failed\ncheck conda dependencies\n" ; exit 1 ; }
 
 # test each command one by one and install them if necessary:
-mkdir softs
+mkdir -p softs
 cd softs 
 
 
@@ -33,8 +60,8 @@ then
     if [ $? -eq 0 ]; then
         echo $command installation worked successfully
 	MCScanpath=$(pwd)
-        echo -e "\n#Path to $command\nexport PATH=\$PATH:$MCScanpath" >> ~/.bashrc 
-        source ~/.bashrc  
+        echo -e "\n#Path to $command\nexport PATH=\$PATH:$MCScanpath" >> "$PROFILE_PATH"
+        source "$PROFILE_PATH"
         cd ../
 
     else
@@ -56,8 +83,8 @@ then
     cd BRAKER/scripts 
     chmod a+x *.pl *.py
     path=$(pwd)
-    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-    source ~/.bashrc  
+    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -73,11 +100,11 @@ then
     wget -q https://github.com/gatech-genemark/ProtHint/releases/download/v2.6.0/ProtHint-2.6.0.tar.gz 
     tar zxvf ProtHint-2.6.0.tar.gz
     cd ProtHint-2.6.0/bin 
-    #then add to ~/.bashrc
+    #then add to $PROFILE_PATH
     protpath=$(pwd)
-    echo -e "\n#Path to $command\nexport PROTHINT_PATH=:$protpath" >> ~/.bashrc 
-    echo -e "\nexport PATH=\$PATH:$protpath" >> ~/.bashrc
-    source ~/.bashrc  
+    echo -e "\n#Path to $command\nexport PROTHINT_PATH=:$protpath" >> "$PROFILE_PATH"
+    echo -e "\nexport PATH=\$PATH:$protpath" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -94,10 +121,10 @@ then
     mkdir diamond ; cd diamond
     wget -q https://github.com/bbuchfink/diamond/releases/download/v2.1.1/diamond-linux64.tar.gz
     tar zxvf diamond-linux64.tar.gz
-    #then add to ~/.bashrc
+    #then add to $PROFILE_PATH
     path=$(pwd)
-    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-    source ~/.bashrc  
+    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../ 
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -116,9 +143,9 @@ then
     if [ $? -eq 0 ]; then
         echo $command installation worked successfully
         cdbpath=$(pwd)
-        echo -e "\n#Path to $command\nexport CDBTOOLS_PATH=$cdbpath" >> ~/.bashrc 
-        echo -e "\nexport PATH=\$PATH:$cdbpath" >> ~/.bashrc
-        source ~/.bashrc  
+        echo -e "\n#Path to $command\nexport CDBTOOLS_PATH=$cdbpath" >> "$PROFILE_PATH"
+        echo -e "\nexport PATH=\$PATH:$cdbpath" >> "$PROFILE_PATH"
+        source "$PROFILE_PATH"
 	cd ../
     else
         echo -e "\n#ERROR : Installation failed please check everything"  
@@ -138,9 +165,9 @@ if ! command -v $command &> /dev/null
     cd GeneMark-ETP/
     cd bin/gmes
     gmarkpath=$(pwd)
-    echo -e "export GENEMARK_PATH=$gmarkpath/ " >> ~/.bashrc
-    echo -e "\nexport PATH=\$PATH:$gmarkpath" >> ~/.bashrc
-    source ~/.bashrc  
+    echo -e "export GENEMARK_PATH=$gmarkpath/ " >> "$PROFILE_PATH"
+    echo -e "\nexport PATH=\$PATH:$gmarkpath" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../../../ 
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -156,10 +183,10 @@ if ! command -v $command &> /dev/null
     git clone https://github.com/Gaius-Augustus/TSEBRA 
     cd TSEBRA/bin
     tsebrapath=$(pwd)
-    echo -e "\n#Path to $command\nexport TSEBRA_PATH=$tsebrapath" >> ~/.bashrc 
-    echo -e "\n#Path to $command\nexport PATH=\$PATH:$tsebrapath" >> ~/.bashrc 
+    echo -e "\n#Path to $command\nexport TSEBRA_PATH=$tsebrapath" >> "$PROFILE_PATH"
+    echo -e "\n#Path to $command\nexport PATH=\$PATH:$tsebrapath" >> "$PROFILE_PATH"
 
-    source ~/.bashrc  
+    source "$PROFILE_PATH"
     cd ../../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -183,8 +210,8 @@ if ! command -v $command &> /dev/null
         echo $command installation worked successfully
 	cd bin/
         path=$(pwd)
-        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-        source ~/.bashrc  
+        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+        source "$PROFILE_PATH"
         cd ../../
     else
        echo installation failed\nmake sur to have git, make and gclib
@@ -208,8 +235,8 @@ if ! command -v $command &> /dev/null
     if [ $? -eq 0 ]; then
         echo $command installation worked successfully
         path=$(pwd)
-        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-        source ~/.bashrc  
+        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+        source "$PROFILE_PATH"
         cd ../
 
     else
@@ -231,14 +258,14 @@ then
     cd OrthoFinder
     #if command was successfull then add to path:
     path=$(pwd)
-    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-    source ~/.bashrc  
+    echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     
     #also add diamond, fastme and mcl which are present within orthofinder:
     cd bin/
     path=$(pwd)
-    echo -e "\n#Path to diamond\n export PATH=\$PATH:$path" >> ~/.bashrc 
-    source ~/.bashrc  
+    echo -e "\n#Path to diamond\n export PATH=\$PATH:$path" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../../
     #exit 1
 else 
@@ -261,8 +288,8 @@ then
    ln -s muscle3.8.31_i86linux64 muscle
    chmod +x muscle
    path=$(pwd)
-   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> ~/.bashrc 
-   source ~/.bashrc  
+   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> "$PROFILE_PATH"
+   source "$PROFILE_PATH"
    cd ../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -278,8 +305,8 @@ then
    wget -q https://www.agap-ge2pop.org/wp-content/uploads/macse/releases/macse_v2.07.jar
    chmod +x macse*jar
    path=$(pwd)
-   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> ~/.bashrc 
-   source ~/.bashrc  
+   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> "$PROFILE_PATH"
+   source "$PROFILE_PATH"
    cd ../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -312,8 +339,8 @@ then
    mv baseml basemlg chi2 codeml evolver infinitesites mcmctree pamp yn00 ../bin
    cd ../bin
    path=$(pwd)
-   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> ~/.bashrc 
-   source ~/.bashrc  
+   echo -e "\n#Path to $command\n export PATH=\$PATH:$path" >> "$PROFILE_PATH"
+   source "$PROFILE_PATH"
    cd ../../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -332,8 +359,8 @@ then
     cd translatorx 
     chmod +x translatorx_vLocal.pl
     path=$(pwd)
-    echo -e "\n#Path to translatorx\n export PATH=\$PATH:$path" >> ~/.bashrc 
-    source ~/.bashrc  
+    echo -e "\n#Path to translatorx\n export PATH=\$PATH:$path" >> "$PROFILE_PATH"
+    source "$PROFILE_PATH"
     cd ../
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
@@ -367,8 +394,8 @@ then
 	cd ../src
 	#$(find . -name "bamtools" )
         path=$(pwd)
-        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> ~/.bashrc 
-        source ~/.bashrc  
+        echo -e "\n#Path to $command\nexport PATH=\$PATH:$path" >> "$PROFILE_PATH"
+        source "$PROFILE_PATH"
         cd ../../../
     else
        echo installation failed\nmake sur to have git, make and cmake
@@ -398,6 +425,7 @@ then
         echo $command installation worked successfully
 
         htpath="$(echo $(pwd)"/include/htslib/")"
+        htlpath="$(echo $(pwd)"/lib/")"
         cd ../
     else
         echo installation of $command failed! check the logs
@@ -407,6 +435,7 @@ else
     #note: should be installed from braker_env (through minimap2)
     htcmd=$(command -v "$command")
     htpath=$(echo $htcmd |sed 's/bin\/htsfile/include\/htslib/')
+    htlpath=$(echo $htcmd |sed 's/bin\/htsfile/lib/')
 fi
 
 #in case this did not work test this: 
@@ -447,19 +476,19 @@ then
     sed -i "s#usr/include/htslib#$htpath#g" common.mk
 
     n=$(grep -n "LIBRARY_PATH_HTSLIB" common.mk |awk -F":" '{print $1}' )
-    sed -i  "${n}s#usr/lib/x86_64-linux-gnu#$htpath/lib#g" common.mk
+    sed -i  "${n}s#usr/lib/x86_64-linux-gnu#$htlpath#g" common.mk
     #attempt to make augustus:
     make augustus
     #if all was succesffull: ""
     if [ $? -eq 0 ]; then
         echo $command installation worked successfully
         augustuspath=$(pwd)
-	    echo -e "#path to AUGUSTUS:" >> ~/.bashrc 
-        echo -e "export AUGUSTUS_CONFIG_PATH=$augustuspath/config " >> ~/.bashrc
-        echo -e "export AUGUSTUS_BIN_PATH=$augustuspath/bin/ " >> ~/.bashrc
-	    echo -e "export PATH=\$PATH:$augustuspath/bin" >> ~/.bashrc
-        echo -e "export AUGUSTUS_SCRIPTS_PATH=/$augustuspath/augustus_scripts " >> ~/.bashrc
-	source ~/.bashrc
+	    echo -e "#path to AUGUSTUS:" >> "$PROFILE_PATH"
+        echo -e "export AUGUSTUS_CONFIG_PATH=$augustuspath/config " >> "$PROFILE_PATH"
+        echo -e "export AUGUSTUS_BIN_PATH=$augustuspath/bin/ " >> "$PROFILE_PATH"
+	    echo -e "export PATH=\$PATH:$augustuspath/bin" >> "$PROFILE_PATH"
+        echo -e "export AUGUSTUS_SCRIPTS_PATH=/$augustuspath/augustus_scripts " >> "$PROFILE_PATH"
+	source "$PROFILE_PATH"
 	cd ./auxprogs/joingenes
 	make -j8
         cd ../bam2hints

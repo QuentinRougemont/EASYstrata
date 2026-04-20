@@ -228,7 +228,7 @@ if (argv[1]=="-h" || length(argv)==0){
       xlab("order along reference") +
       ylab( expression(italic(d[S]))) +
       th_plot + theme(legend.position = "none") +
-      scale_color_manual(values=wes_palette(n=ncolors, name="GrandBudapest1")) +
+      scale_color_manual(values=colorRampPalette(wes_palette(name="GrandBudapest1"))(ncolors)) +
       ggtitle("B") 
     
     #create dir if not present:
