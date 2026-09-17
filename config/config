@@ -62,5 +62,5 @@ aln_method="macse" #default: macse - choose between "macse" or "muscle"
 max_ds=0.5 #dS values above this threshold will be removed for the changepoint analysis (putative pseudogene, too divergent values)  
 
 
-#to add:
 #single copy orthologs files [when orthology infered from multiple species]
+single_copy_file="" #eg: /path/to/EASYstrata/single_copy_orthologs"
