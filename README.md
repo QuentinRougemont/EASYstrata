@@ -45,6 +45,9 @@ This software is suitable only in linux-like systems (Unfortunately not Windows 
 
 # Before launching the workflow
 
+We recommand **mamba** over **conda** as the later can be very slow. Alternatively edit the script in INSTALL/dependencies.sh to replace calls to mamba by conda.  
+
+
 Clone the workflow, then please work from within it to preserve the architecture.
 
 We recommend that you clone the pipeline ***for each of your new project*** and work within it, and to keep all projects separated otherwise it will be difficult to recover your results.   
