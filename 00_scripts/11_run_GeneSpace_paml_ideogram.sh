@@ -30,6 +30,8 @@ Help()
    echo "dependancies: orthofinder, mcscanx, GeneSpace, paml (yn00), Rideogram, translatorX minimap2"
 }
 
+eval "$(conda shell.bash hook)"
+conda activate superannot
 
 ############################################################
 # Process the input options.                               #
@@ -594,6 +596,10 @@ if [ "$options" = "Ds_only" ] ; then
             echo "please check your single copy orthologs file"
         else 
             if [ -n "${ancestral_genome}" ]; then
+            ancestral=$(head -n1 ancestral_sp/ancestral_sp.fa.fai \
+                |cut -f1 \
+                |awk '{gsub("_","\t",$0) ; print $1}')
+
                 p_anc=$(awk -v anc="$ancestral" '{for(i=1;i<=NF;++i)if($i ~ anc )print $i}' "$single_copy_file" )
                 size_anc=$(paste <(echo "$p_anc") |wc -l )
                 if [ "$size1" != "$size_anc" ] ; then 
@@ -840,7 +846,10 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "Ds_only" ]] || [[ $optio
 
     #/!\ chromosomes should be reconstructed on the fly from the N0.tsv file
     if [ -n "${ancestral_genome}" ]
-    then
+             ancestral=$(head -n1 ancestral_sp/ancestral_sp.fa.fai \
+                |cut -f1 \
+                |awk '{gsub("_","\t",$0) ; print $1}')
+   then
         cat <(sed 1d 02_results/synteny_"$haplo1"_"$haplo2".txt \
              |awk -v var1="$haplo1" -v var2="$haplo2"  '{print var1"\t"$4"\n"var2"\t"$8}' \
              |sort |uniq -c |awk '$1>0 {print $2"\t"$3}'  ) \

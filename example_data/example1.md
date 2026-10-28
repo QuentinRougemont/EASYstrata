@@ -86,7 +86,7 @@ I like to use the `readlink -f` command to extract full path and add them to txt
 cp example1.config config/config
 
 ```sh
-./master.sh -o1 2>&1 |tee log
+./master.sh -o 1 2>&1 |tee log
 ```
 
 ## 4 - results visualisation :

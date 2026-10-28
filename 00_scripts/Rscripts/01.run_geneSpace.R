@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 
 #nano script to simply run genespace:
+library(devtools)
+devtools::install_github("jtlovell/GENESPACE")
 library(GENESPACE)
 
 #some parameters:

@@ -23,20 +23,20 @@ source "$PROFILE_PATH"
 eval "$(mamba shell hook --shell bash)"
 mamba activate superannot
 
-Rscript -e 'if (!requireNamespace("devtools", quietly=TRUE)) install.packages("devtools", repos="https://cloud.r-project.org")' || \
-    { echo -e "ERROR!\ndevtools installation failed\ncheck your R setup\n" ; exit 1 ; }
-
-Rscript -e 'if (!requireNamespace("remotes", quietly=TRUE)) install.packages("remotes", repos="https://cloud.r-project.org")' || \
-    { echo -e "ERROR!\nremotes installation failed\ncheck your R setup\n" ; exit 1 ; }
-
-Rscript -e 'if (!requireNamespace("BiocManager", quietly=TRUE)) install.packages("BiocManager", repos="https://cloud.r-project.org")' || \
-    { echo -e "ERROR!\nBiocManager installation failed\ncheck your R setup\n" ; exit 1 ; }
-
-Rscript -e 'if (!requireNamespace("Biostrings", quietly=TRUE)) BiocManager::install("Biostrings", ask=FALSE, update=FALSE)' || \
-    { echo -e "ERROR!\nBiostrings installation failed\ncheck your R/Bioconductor setup\n" ; exit 1 ; }
-
-Rscript -e 'remotes::install_version("ggplot2",repos="https://cloud.r-project.org" version="3.5.1", upgrade="never")' || \
-    { echo -e "ERROR!\nggplot2 installation failed\ncheck your R setup\n" ; exit 1 ; }
+#Rscript -e 'if (!requireNamespace("devtools", quietly=TRUE)) install.packages("devtools", repos="https://cloud.r-project.org")' || \
+#    { echo -e "ERROR!\ndevtools installation failed\ncheck your R setup\n" ; exit 1 ; }
+#
+#Rscript -e 'if (!requireNamespace("remotes", quietly=TRUE)) install.packages("remotes", repos="https://cloud.r-project.org")' || \
+#    { echo -e "ERROR!\nremotes installation failed\ncheck your R setup\n" ; exit 1 ; }
+#
+#Rscript -e 'if (!requireNamespace("BiocManager", quietly=TRUE)) install.packages("BiocManager", repos="https://cloud.r-project.org")' || \
+#    { echo -e "ERROR!\nBiocManager installation failed\ncheck your R setup\n" ; exit 1 ; }
+#
+#Rscript -e 'if (!requireNamespace("Biostrings", quietly=TRUE)) BiocManager::install("Biostrings", ask=FALSE, update=FALSE)' || \
+#    { echo -e "ERROR!\nBiostrings installation failed\ncheck your R/Bioconductor setup\n" ; exit 1 ; }
+#
+#Rscript -e 'remotes::install_version("ggplot2",repos="https://cloud.r-project.org" version="3.5.1", upgrade="never")' || \
+#    { echo -e "ERROR!\nggplot2 installation failed\ncheck your R setup\n" ; exit 1 ; }
 
 #install GeneSpace first:
 Rscript -e  'devtools::install_github("jtlovell/GENESPACE")' || \
@@ -71,7 +71,6 @@ then
 else 
     echo -e "\ncommand $command already installed\nskipping installation\n\n"
 fi
-
 
 #braker: 
 command='braker.pl'

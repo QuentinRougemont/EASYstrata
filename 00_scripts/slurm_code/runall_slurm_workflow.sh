@@ -7,7 +7,6 @@
 DEPENDS="--dependency=afterok:"
 SCRIPTPATH="./00_scripts/slurm_code"
 
-# Warning to have a population map file ready before running this script
 echo "WARNING! Make sure you have properly set up to config file in config/ folder"
 echo " "
 
