@@ -337,7 +337,7 @@ if [[ $options = "synteny_and_Ds" ]]  || [[ $options = "synteny_only" ]] ; then
         fi
         MCScanpath=$(command -v MCScanX |xargs dirname )
         #just in case this is not already done:
-        Rscript -e  'devtools::install_github("jtlovell/GENESPACE")'
+        #Rscript -e  'devtools::install_github("jtlovell/GENESPACE")'
         sed -i "s#mcpath#$MCScanpath#" ../00_scripts/Rscripts/01.run_geneSpace.R
         
         Rscript ../00_scripts/Rscripts/01.run_geneSpace.R || exit 1
