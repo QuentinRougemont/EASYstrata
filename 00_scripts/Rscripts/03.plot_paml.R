@@ -210,7 +210,7 @@ if (argv[1]=="-h" || length(argv)==0){
       facet_wrap(~scaff, scale="free_x") +
       geom_point( size = 1) + 
       theme_classic() +
-      scale_y_break(c(1,max(all$Ds, na.rm = T)-0.1)) + #just zoom on the 0-1 range and break for extreme values
+      #scale_y_break(c(1,max(all$Ds, na.rm = T)-0.1)) + #just zoom on the 0-1 range and break for extreme values
       ylim(c(0,max(all$Ds, na.rm=T)+.1)) +
       xlab("position along chromosome") +
       ylab( expression(italic(d[S]))) +

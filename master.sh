@@ -98,7 +98,7 @@ validate_gtf_gene_ids()
             count = 0
             bad = 0
         }
-        $0 !~ /^#/ && ($3 == "gene" || $3 == "transcript" || $3 == "mRNA") {
+        $0 !~ /^#/ && ($3 == "gene" ||  $3 == "mRNA") {
             id = ""
             if (match($0, /gene_id "[^"]+"/)) {
                 id = substr($0, RSTART + 9, RLENGTH - 10)
