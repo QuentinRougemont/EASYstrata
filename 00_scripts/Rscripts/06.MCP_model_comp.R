@@ -127,7 +127,7 @@ if (argv[1]=="-h" || length(argv)==0){
     
     xl <- expression(paste("Order along  mating chromsome"))
     plotcp <- function(cpmodel, title) {
-     plot(cpmodel, q_fit = TRUE) + ggplot2::ggtitle(title) + 
+     plot(cpmodel, interval = "fitted") + ggplot2::ggtitle(title) + 
          theme_classic() + 
          th_plot +
          geom_point(color = "darkblue", size = 0.1) +
@@ -139,17 +139,17 @@ if (argv[1]=="-h" || length(argv)==0){
     #                   perform the changepoint analyis here: 
     ################################################################################
     #define the model we want to test:
-    #model10cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1, 1 ~ 1, 1 ~ 1,1 ~ 1) 
+    #model10cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1, ~ 1, ~ 1, ~ 1) 
     #we probably don't need 10 !
-    model9cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 , 1 ~ 1, 1 ~ 1) #10 strata (8 strata if PAR on each side) 
-    model8cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 , 1 ~ 1)        #9 strata  (7 strata if PAR on each side)  
-    model7cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 )               #8 strata  
-    model6cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1)                        #7 strata
-    model5cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1)                                #....
-    model4cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1)
-    model3cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1)
-    model2cp = list(Ds ~ 1, 1~ 1, 1 ~ 1)
-    model1cp = list(Ds ~ 1, 1~ 1)
+    model9cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 , ~ 1, ~ 1) #10 strata (8 strata if PAR on each side) 
+    model8cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 , ~ 1)        #9 strata  (7 strata if PAR on each side)  
+    model7cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 )               #8 strata  
+    model6cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1)                        #7 strata
+    model5cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1)                                #....
+    model4cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1)
+    model3cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1)
+    model2cp = list(Ds ~ 1, ~ 1, ~ 1)
+    model1cp = list(Ds ~ 1, ~ 1)
     
     ## NOTE :
     #we don't use any prior for now
@@ -165,15 +165,15 @@ if (argv[1]=="-h" || length(argv)==0){
     m <- list()
     
 
+    future::plan(future::multisession, workers = 6)  # run chains in parallel
     for(i in 1:maxchgp){
         message(i)
         fitcp[[i]] <- mcp(modelcp[[i]], 
                      data = df, 
                      par_x = "orderchp", 
                      iter = 8e4, 
-                     adapt = 1e3,  
-                     chains = 6, 
-                     cores = 6 )
+                     warmup = 1e3,  
+                     chains = 6 )
     
         figcp[[i]] <- plotcp(fitcp[[i]], paste0("Posterior fit ", i ,"  changepoint")) 
         
@@ -388,10 +388,10 @@ if (argv[1]=="-h" || length(argv)==0){
     
     for (i in 1:maxchgp){
       if (i == 1){
-        hyp2 <- data.frame(matrix(ncol = 6, nrow = 2)) %>%
-            set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
-        hyp2[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp2[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_1"))
+        hyp2 <- data.frame(matrix(ncol = 7, nrow = 2)) %>%
+            set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
+        hyp2[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp2[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_1"))
         
         write.table(hyp2, paste0(path, "hypothesis2strata"), quote= F)
         #plot_pos_list[[1]] <- dplot(df, nstrata=2, "two_strata") + ggtitle("A - two strata")
@@ -403,12 +403,12 @@ if (argv[1]=="-h" || length(argv)==0){
         vp2s <- ggbetweenstats(df, two_strata, Ds)  + ylab(expression(italic(d[s]))) + th_plot3
 
      } else if (i == 2){
-        hyp3 <- data.frame(matrix(ncol = 6, nrow = 4)) %>%
-            set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
-        hyp3[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp3[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp3[3,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp3[4,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
+        hyp3 <- data.frame(matrix(ncol = 7, nrow = 4)) %>%
+            set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
+        hyp3[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp3[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp3[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp3[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
         
         write.table(hyp3, paste0(path, "hypothesis3strata"), quote= F)
         #plot_pos_list[[2]] <- dplot(df, nstrata=3, "three_strata") + ggtitle("B - three changepoint")
@@ -419,15 +419,15 @@ if (argv[1]=="-h" || length(argv)==0){
         vp3s <- ggbetweenstats(df, three_strata, Ds)  + ylab(expression(italic(d[s]))) + th_plot3
 
       } else if (i == 3){
-        hyp4 <- data.frame(matrix(ncol = 6, nrow = 6))%>%
-          set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp4 <- data.frame(matrix(ncol = 7, nrow = 6))%>%
+          set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
       
-        hyp4[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp4[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp4[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp4[4,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp4[5,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp4[6,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
+        hyp4[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp4[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp4[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp4[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp4[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp4[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
         
         write.table(hyp4, paste0(path,  "hypothesis4strata.txt"), quote= F)
         ds4.1 <- dplot(df, nstrata=4, "four_strata")  + ggtitle("C - three changepoint")
@@ -435,17 +435,17 @@ if (argv[1]=="-h" || length(argv)==0){
         vp4s <- ggbetweenstats(df, four_strata, Ds)   + ylab(expression(italic(d[s]))) + th_plot3
     
       } else if (i == 4){
-        hyp5 <- data.frame(matrix(ncol = 6, nrow = 8))%>%
-          set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp5 <- data.frame(matrix(ncol = 7, nrow = 8))%>%
+          set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
         
-        hyp5[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp5[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp5[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp5[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-        hyp5[5,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp5[6,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp5[7,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-        hyp5[8,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
+        hyp5[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp5[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp5[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp5[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+        hyp5[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp5[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp5[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+        hyp5[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
     
         write.table(hyp5, paste0(path, "hypothesis5strata.txt"), quote= F)
         ds5.1 <- dplot(df, nstrata=5, "five_strata")  + ggtitle("D - four changepoint")
@@ -453,19 +453,19 @@ if (argv[1]=="-h" || length(argv)==0){
         vp5s <- ggbetweenstats(df, five_strata, Ds)   + ylab(expression(italic(d[s]))) + th_plot3
 
      } else if (i == 5){
-        hyp6 <- data.frame(matrix(ncol = 6, nrow = 10))%>%
-          set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp6 <- data.frame(matrix(ncol = 7, nrow = 10))%>%
+          set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
         
-        hyp6[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp6[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp6[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp6[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-        hyp6[5,] <-  hypothesis(fitcp[[i]],  c("int_5 < int_6"))
-        hyp6[6,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp6[7,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp6[8,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-        hyp6[9,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
-        hyp6[10,] <-  hypothesis(fitcp[[i]],  c("int_5 > int_6"))
+        hyp6[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp6[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp6[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp6[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+        hyp6[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 < Intercept_6"))
+        hyp6[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp6[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp6[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+        hyp6[9,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
+        hyp6[10,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 > Intercept_6"))
 
         write.table(hyp6, paste0(path, "hypothesis6strata.txt"), quote= F)
         ds6.1 <- dplot(df, nstrata=6, "six_strata")  + ggtitle("E - five changepoint")
@@ -474,21 +474,21 @@ if (argv[1]=="-h" || length(argv)==0){
 
      } else if (i == 6){
       
-       hyp7 <- data.frame(matrix(ncol = 6, nrow = 12))%>%
-       set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+       hyp7 <- data.frame(matrix(ncol = 7, nrow = 12))%>%
+       set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
        
-       hyp7[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-       hyp7[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-       hyp7[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-       hyp7[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-       hyp7[5,] <-  hypothesis(fitcp[[i]],  c("int_5 < int_6"))
-       hyp7[6,] <-  hypothesis(fitcp[[i]],  c("int_6 < int_7"))
-       hyp7[7,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-       hyp7[8,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-       hyp7[9,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-       hyp7[10,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
-       hyp7[11,] <-  hypothesis(fitcp[[i]],  c("int_5 > int_6"))
-       hyp7[12,] <-  hypothesis(fitcp[[i]],  c("int_6 > int_7"))
+       hyp7[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+       hyp7[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+       hyp7[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+       hyp7[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+       hyp7[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 < Intercept_6"))
+       hyp7[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 < Intercept_7"))
+       hyp7[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+       hyp7[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+       hyp7[9,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+       hyp7[10,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
+       hyp7[11,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 > Intercept_6"))
+       hyp7[12,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 > Intercept_7"))
 
         write.table(hyp7, paste0(path, "hypothesis7strata.txt"), quote= F)
         ds7.1 <- dplot(df, nstrata=7, "seven_strata")  + ggtitle("F - six changepoint")
@@ -497,23 +497,23 @@ if (argv[1]=="-h" || length(argv)==0){
 
      } else if (i == 7){
         
-        hyp8 <- data.frame(matrix(ncol = 6, nrow = 14))%>%
-         set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp8 <- data.frame(matrix(ncol = 7, nrow = 14))%>%
+         set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
        
-        hyp8[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp8[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp8[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp8[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-        hyp8[5,] <-  hypothesis(fitcp[[i]],  c("int_5 < int_6"))
-        hyp8[6,] <-  hypothesis(fitcp[[i]],  c("int_6 < int_7"))
-        hyp8[7,] <-  hypothesis(fitcp[[i]],  c("int_7 < int_8"))
-        hyp8[8,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp8[9,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp8[10,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-        hyp8[11,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
-        hyp8[12,] <-  hypothesis(fitcp[[i]],  c("int_5 > int_6"))
-        hyp8[13,] <-  hypothesis(fitcp[[i]],  c("int_6 > int_7"))
-        hyp8[14,] <-  hypothesis(fitcp[[i]],  c("int_7 > int_8"))
+        hyp8[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp8[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp8[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp8[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+        hyp8[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 < Intercept_6"))
+        hyp8[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 < Intercept_7"))
+        hyp8[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 < Intercept_8"))
+        hyp8[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp8[9,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp8[10,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+        hyp8[11,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
+        hyp8[12,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 > Intercept_6"))
+        hyp8[13,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 > Intercept_7"))
+        hyp8[14,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 > Intercept_8"))
     
         write.table(hyp8, paste0(path, "hypothesis8strata.txt"), quote= F)
         ds8.1 <- dplot(df, nstrata=8, "eight_strata")  + ggtitle("H - seven changepoint")
@@ -522,25 +522,25 @@ if (argv[1]=="-h" || length(argv)==0){
 
      } else if (i == 8){
        
-        hyp9 <- data.frame(matrix(ncol = 6, nrow = 16))%>%
-          set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp9 <- data.frame(matrix(ncol = 7, nrow = 16))%>%
+          set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
         
-        hyp9[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp9[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp9[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp9[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-        hyp9[5,] <-  hypothesis(fitcp[[i]],  c("int_5 < int_6"))
-        hyp9[6,] <-  hypothesis(fitcp[[i]],  c("int_6 < int_7"))
-        hyp9[7,] <-  hypothesis(fitcp[[i]],  c("int_7 < int_8"))
-        hyp9[8,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp9[9,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp9[10,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-        hyp9[11,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
-        hyp9[12,] <-  hypothesis(fitcp[[i]],  c("int_5 > int_6"))
-        hyp9[13,] <-  hypothesis(fitcp[[i]],  c("int_6 > int_7"))
-        hyp9[14,] <-  hypothesis(fitcp[[i]],  c("int_7 > int_8"))
-        hyp9[15,] <-  hypothesis(fitcp[[i]],  c("int_8 < int_9"))
-        hyp9[16,] <-  hypothesis(fitcp[[i]],  c("int_8 > int_9"))
+        hyp9[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp9[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp9[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp9[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+        hyp9[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 < Intercept_6"))
+        hyp9[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 < Intercept_7"))
+        hyp9[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 < Intercept_8"))
+        hyp9[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp9[9,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp9[10,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+        hyp9[11,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
+        hyp9[12,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 > Intercept_6"))
+        hyp9[13,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 > Intercept_7"))
+        hyp9[14,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 > Intercept_8"))
+        hyp9[15,] <-  hypothesis(fitcp[[i]],  c("Intercept_8 < Intercept_9"))
+        hyp9[16,] <-  hypothesis(fitcp[[i]],  c("Intercept_8 > Intercept_9"))
     
         write.table(hyp9, paste0(path, "hypothesis9strata.txt"), quote= F)
         ds8.1 <- dplot(df, nstrata=9, "nine_strata")  + ggtitle("I - eight changepoint")
@@ -549,27 +549,27 @@ if (argv[1]=="-h" || length(argv)==0){
 
      } else if (i == 9){
        
-        hyp10 <- data.frame(matrix(ncol = 6, nrow = 18))%>%
-          set_colnames(.,c('hypothesis','mean','lower','upper','p','BF'))
+        hyp10 <- data.frame(matrix(ncol = 7, nrow = 18))%>%
+          set_colnames(.,c('hypothesis','mean','sd','lower','upper','prob','BF'))
         
-        hyp9[1,] <-  hypothesis(fitcp[[i]],  c("int_1 < int_2"))
-        hyp9[2,] <-  hypothesis(fitcp[[i]],  c("int_2 < int_3"))
-        hyp9[3,] <-  hypothesis(fitcp[[i]],  c("int_3 < int_4"))
-        hyp9[4,] <-  hypothesis(fitcp[[i]],  c("int_4 < int_5"))
-        hyp9[5,] <-  hypothesis(fitcp[[i]],  c("int_5 < int_6"))
-        hyp9[6,] <-  hypothesis(fitcp[[i]],  c("int_6 < int_7"))
-        hyp9[7,] <-  hypothesis(fitcp[[i]],  c("int_7 < int_8"))
-        hyp9[8,] <-  hypothesis(fitcp[[i]],  c("int_1 > int_2"))
-        hyp9[9,] <-  hypothesis(fitcp[[i]],  c("int_2 > int_3"))
-        hyp9[10,] <-  hypothesis(fitcp[[i]],  c("int_3 > int_4"))
-        hyp9[11,] <-  hypothesis(fitcp[[i]],  c("int_4 > int_5"))
-        hyp9[12,] <-  hypothesis(fitcp[[i]],  c("int_5 > int_6"))
-        hyp9[13,] <-  hypothesis(fitcp[[i]],  c("int_6 > int_7"))
-        hyp9[14,] <-  hypothesis(fitcp[[i]],  c("int_7 > int_8"))
-        hyp9[15,] <-  hypothesis(fitcp[[i]],  c("int_8 < int_9"))
-        hyp9[16,] <-  hypothesis(fitcp[[i]],  c("int_8 > int_9"))
-        hyp9[17,] <-  hypothesis(fitcp[[i]],  c("int_9 < int_10"))
-        hyp9[18,] <-  hypothesis(fitcp[[i]],  c("int_9 > int_10"))
+        hyp9[1,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 < Intercept_2"))
+        hyp9[2,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 < Intercept_3"))
+        hyp9[3,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 < Intercept_4"))
+        hyp9[4,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 < Intercept_5"))
+        hyp9[5,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 < Intercept_6"))
+        hyp9[6,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 < Intercept_7"))
+        hyp9[7,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 < Intercept_8"))
+        hyp9[8,] <-  hypothesis(fitcp[[i]],  c("Intercept_1 > Intercept_2"))
+        hyp9[9,] <-  hypothesis(fitcp[[i]],  c("Intercept_2 > Intercept_3"))
+        hyp9[10,] <-  hypothesis(fitcp[[i]],  c("Intercept_3 > Intercept_4"))
+        hyp9[11,] <-  hypothesis(fitcp[[i]],  c("Intercept_4 > Intercept_5"))
+        hyp9[12,] <-  hypothesis(fitcp[[i]],  c("Intercept_5 > Intercept_6"))
+        hyp9[13,] <-  hypothesis(fitcp[[i]],  c("Intercept_6 > Intercept_7"))
+        hyp9[14,] <-  hypothesis(fitcp[[i]],  c("Intercept_7 > Intercept_8"))
+        hyp9[15,] <-  hypothesis(fitcp[[i]],  c("Intercept_8 < Intercept_9"))
+        hyp9[16,] <-  hypothesis(fitcp[[i]],  c("Intercept_8 > Intercept_9"))
+        hyp9[17,] <-  hypothesis(fitcp[[i]],  c("Intercept_9 < Intercept_10"))
+        hyp9[18,] <-  hypothesis(fitcp[[i]],  c("Intercept_9 > Intercept_10"))
 
         write.table(hyp10, paste0(path, "hypothesis10strata.txt"), quote= F)
         ds9.1 <- dplot(df, nstrata=10, "ten_strata") + ggtitle("J - nine changepoint")
