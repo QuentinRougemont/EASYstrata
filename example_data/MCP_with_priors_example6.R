@@ -93,7 +93,7 @@ vplot <- function(data, nstrata, columnstrata) {
     
 xl <- expression(paste("order along ", italic("ancestral species"), " mating chromsome"))
 plotcp <- function(cpmodel, title) {
-     plot(cpmodel, q_fit = TRUE) + ggplot2::ggtitle(title) + 
+     plot(cpmodel, interval = "fitted") + ggplot2::ggtitle(title) + 
          theme_classic() + 
          th_plot +
          geom_point(color = "darkblue", size = 0.1) +
@@ -105,17 +105,17 @@ plotcp <- function(cpmodel, title) {
 #   perform the changepoint analyis here: 
 ################################################################################
 #define the model we want to test:
-#model10cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1, 1 ~ 1, 1 ~ 1,1 ~ 1) 
+#model10cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1, ~ 1, ~ 1, ~ 1) 
 #we probably don't need 10 !
-model9cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 , 1 ~ 1, 1 ~ 1) 
-model8cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 , 1 ~ 1) 
-model7cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1, 1  ~ 1 ) 
-model6cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1 , 1 ~ 1)
-model5cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1 , 1 ~ 1)
-model4cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1, 1 ~ 1)
-model3cp = list(Ds ~ 1, 1~ 1, 1 ~ 1, 1 ~ 1)
-model2cp = list(Ds ~ 1, 1~ 1, 1 ~ 1)
-model1cp = list(Ds ~ 1, 1~ 1)
+model9cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 , ~ 1, ~ 1) 
+model8cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 , ~ 1) 
+model7cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1, ~ 1 ) 
+model6cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1 , ~ 1)
+model5cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1 , ~ 1)
+model4cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1, ~ 1)
+model3cp = list(Ds ~ 1, ~ 1, ~ 1, ~ 1)
+model2cp = list(Ds ~ 1, ~ 1, ~ 1)
+model1cp = list(Ds ~ 1, ~ 1)
 
 ###########################################################################
 #### changepoint with prior example
@@ -131,35 +131,34 @@ if (!dir.exists("02_results/modelcomp/withprior")){
 path="02_results/modelcomp/withprior"
 #unfortunately it seems that this needs to be run manually given the dependance on user assumed priors
 
+future::plan(future::multisession, workers = 5)  # run chains in parallel
+
 prior2=list(cp_1="dnorm(100, 10)",cp_2="dnorm(330, 10)")
 priorfit_2cp = mcp(model2cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior = prior2,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior3=list(cp_1="dnorm(100, 10)",cp_2="dnorm(300, 10)",cp_3="dnorm(331, 10)")
 priorfit_3cp = mcp(model3cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior = prior3,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior4=list(cp_1="dnorm(85, 10)",cp_2="dnorm(130, 10)",cp_3="dnorm(280, 10)",cp_4="dnorm(331,10)")
 priorfit_4cp = mcp(model4cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior=prior4,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior5=list(cp_1="dnorm(85,10)", cp_2="dnorm(130,10)", cp_3="dnorm(250, 10)", 
             cp_4="dnorm(285,5)", cp_5="dnorm(327,5)")
@@ -167,10 +166,9 @@ priorfit_5cp = mcp(model5cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior=prior5,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior6=list(cp_1="dnorm(90,10)", cp_2="dnorm(125,10)", cp_3="dnorm(230,5)", 
             cp_4="dnorm(265,5)", cp_5="dnorm(285,5)", cp_6="dnorm(335,5)")
@@ -185,10 +183,9 @@ priorfit_6cp = mcp(model6cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior = prior6,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior7=list(cp_1="dnorm(90, 10)",cp_2="dnorm(125, 10)",cp_3="dnorm(170, 10)",cp_4="dnorm(200, 10)",
             cp_5="dnorm(250,5)",cp_6="dnorm(285,5)",cp_7="dnorm(335,5)")
@@ -202,10 +199,9 @@ priorfit_7cp = mcp(model7cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior = prior7,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior8=list(cp_1="dnorm(90, 10)",cp_2="dnorm(125, 10)",cp_3="dnorm(170, 10)",cp_4="dnorm(200, 10)",
             cp_5="dnorm(250,5)", cp_6="dnorm(280,5)",cp_7="dnorm(300,5)",cp_8="dnorm(335,5)")
@@ -213,14 +209,13 @@ priorfit_8cp = mcp(model8cp,
        data = df,
        par_x = "orderchp",
        iter = 8e3,
-       adapt = 1.5e3,
+       warmup = 1.5e3,
        prior = prior8,
-       chains = 5,
-       cores = 5 )
+       chains = 5 )
 
 prior9=list(cp_1="dnorm(90, 10)",cp_2="dnorm(125, 10)",cp_3="dnorm(150, 10)",cp_4="dnorm(170, 10)",
             cp_5="dnrom(200,5)", cp_6="dnorm(250,5)",cp_7="dnorm(280,5)",cp_8="dnorm(305,5)",cp_9="dnorm(335,5)"))
-priorfit_9cp = mcp(model8cp, data = df, par_x = "orderchp",   iter = 8e3, adapt = 1.5e3, prior = prior9, chains = 5, cores = 5 )
+priorfit_9cp = mcp(model8cp, data = df, par_x = "orderchp",   iter = 8e3, warmup = 1.5e3, prior = prior9, chains = 5 )
 #
 ##summarise them all:
 Fig2cpt <- plotcp(priorfit_2cp, "Posterior fit - 2 changepoint") 
